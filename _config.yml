@@ -13,5 +13,8 @@ author:
 gems:
   - jekyll-paginate
 
+# Theme
+theme: jekyll-theme-cayman
+
 #Others
 markdown: kramdown
