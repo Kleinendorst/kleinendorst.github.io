@@ -1,0 +1,17 @@
+# Setup
+title:        Reactive blog
+tagline:      Disovering Reactive systems
+baseurl:      ""
+paginate:     1
+
+# About/contact
+author:
+  name:       Thomas Kleinendorst
+  url:        http://kleinendorst.eu 
+
+# Gems
+gems:
+  - jekyll-paginate
+
+#Others
+markdown: kramdown
