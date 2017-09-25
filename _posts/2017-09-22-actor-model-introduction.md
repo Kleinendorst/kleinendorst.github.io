@@ -22,9 +22,9 @@ Actors always live in a hierarchical graph. Implementations of the actor system 
 
 The delegation of tasks continous until tasks are small enough to handle in a synchronous context. Actors that run these tasks are often called workers and actors delegating work are called supervisors.
 
-Because each actor runs in it’s own thread, jobs that get delegated to children are automatically run in parallel. Multithreading is actually the key features of the actor based system. The other features of the actor (mainly) make managing this multithreaded approach possible.
+Because each actor runs in its own thread, jobs that get delegated to children are automatically run in parallel. Multithreading is actually the key features of the actor based system. The other features of the actor (mainly) make managing this multithreaded approach possible.
 
-By encapsulating it’s own state which may only be accessed by the Actors single thread,  Atomic objects and the use of locking are not needed. Consider a group of people having to finish a report. They first all work inside the same document and it quickly becomes a mess. Nobody knows which version to merge with what version of their peers. This group now chooses a leader (supervisor) who is responsible for delegating chapters and merging the final result. 
+By encapsulating its own state which may only be accessed by the Actors single thread,  Atomic objects and the use of locking are not needed. Consider a group of people having to finish a report. They first all work inside the same document and it quickly becomes a mess. Nobody knows which version to merge with what version of their peers. This group now chooses a leader (supervisor) who is responsible for delegating chapters and merging the final result. 
 
 Communication between actors can’t happen with method calls. Whenever a method is called it enters the call stack, and would thus be blocking. Instead actors send messages to each other. These messages are send in a fire-and-forget fashion. If a return value is suspected, the recipient of that message should send a letter back containing that return value. 
 
@@ -104,7 +104,7 @@ class WeatherManager extends AbstractActor {
 
 This is the code we need for the weather manager for now. By extending akka.actor.AbstractActor, this object can be used as an actor in the Akka system (we created in the main class). Let’s look at some common building blocks the actor exists of:
 
-1. Akka provides it’s own logging adapter. It logs messages to the console (non-blocking) and logs the actor adres in the system, which might be useful for debugging purposes. We will discus the actor adresses later. 
+1. Akka provides its own logging adapter. It logs messages to the console (non-blocking) and logs the actor adres in the system, which might be useful for debugging purposes. We will discus the actor adresses later. 
 
 2. Actors aren’t created with the new keyword, instead they are created by the `Props.create()`. The props factory function is something often used with Akka actors.
 
@@ -114,7 +114,7 @@ This is the code we need for the weather manager for now. By extending akka.acto
 
 5. In this function we will handle the message, for now it just outputs the request parameters, but we will fix this soon.
 
-Now to create this actor and tell it to do it’s job we write the following code in the main function:
+Now to create this actor and tell it to do its job we write the following code in the main function:
 
 {% highlight java %}
 ActorSystem system = ActorSystem.create("weather");
@@ -130,9 +130,9 @@ We call the `tell()` function to send a request message to the actor. When run w
 
 `[akka://weather/user/weather-manager] requestId: 0: Requested weather prediction for Eindhoven.`
 
-Because the `WeatherManager` runs in it’s own thread, the main app is never blocked. The thread it’s run on can be seen in the logs (`dispatcher-3`). We can also see the address of the actor that printer the message (`akka://weather/user/weather-manager`). When connecting the http services Akka provides, we can even send messages to actors between JVM’s via the akka protocol, we’ll cover this in an upcoming article. 
+Because the `WeatherManager` runs in its own thread, the main app is never blocked. The thread it’s run on can be seen in the logs (`dispatcher-3`). We can also see the address of the actor that printer the message (`akka://weather/user/weather-manager`). When connecting the http services Akka provides, we can even send messages to actors between JVM’s via the akka protocol, we’ll cover this in an upcoming article. 
 
-One problem we face is that messages can only be send between actors, meaning that we cannot reply to the request from the main class. This means that the request messages should be send via a (blocking) method call to the main class. These situations, where multiple threads must run the same code, should be avoided at all cost. This is exactly why we designed the `WeatherManager` to finish handling this message (by printing it’s return value).
+One problem we face is that messages can only be send between actors, meaning that we cannot reply to the request from the main class. This means that the request messages should be send via a (blocking) method call to the main class. These situations, where multiple threads must run the same code, should be avoided at all cost. This is exactly why we designed the `WeatherManager` to finish handling this message (by printing its return value).
 
 Let’s continue our example by creating the actor that will run the tasks. Our task of fetching the predicted and actual weather will be executed by the children of the `PredictionCompareTask` actor. 
 
@@ -189,7 +189,7 @@ private void comparePrediction(ComparePredictionRequest r) {
 
 1. We keep track of currently open tasks in the WeatherManager. We create a BiMap which is a map from Google’s Guava project that supports lookups with both keys and values. 
 
-2. We create a new actor by calling getContext().actorOf(). getContext() is a function that is inherited from AbstractActor and its information is used to create an actor that is a child of the current (WeatherManager) actor. The second argument is the name of actors as visible in it’s location address.
+2. We create a new actor by calling getContext().actorOf(). getContext() is a function that is inherited from AbstractActor and its information is used to create an actor that is a child of the current (WeatherManager) actor. The second argument is the name of actors as visible in its location address.
 
 When we run the code we see the following console output:
 
