@@ -1,0 +1,17 @@
+#profile-pic {
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+}
+
+.image-holder {
+	vertical-align: top;
+	display: inline-block;
+	width: 20%;
+}
+
+.text-holder {
+	vertical-align: top;
+	display: inline-block;
+	width: 60%;
+}
