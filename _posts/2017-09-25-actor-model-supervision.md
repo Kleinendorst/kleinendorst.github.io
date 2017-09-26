@@ -31,7 +31,7 @@ private double callRestForTemp(String location, long timeout)
 }
 {% endhighlight %}
 
-This shows the mock for the rest call. First we create a random duration that the thread must wait between 0 and 6000. Then we actually wait that time and check if the waiting time was longer than the actual timeout. If it waited longer than the timeout we throw an error (`java.util.concurrent.TimeoutException`) otherwise return a random temperature.
+This shows the fake implementation for the rest call. First we create a random duration that the thread must wait between 0 and 6000. Then we actually wait that time and check if the waiting time was longer than the actual timeout. If it waited longer than the timeout we throw an error (`java.util.concurrent.TimeoutException`) otherwise return a random temperature.
 
 Methods that can throw an error, and don’t handle the error themselves, include the exceptions it can throw in the call signature. The `throws TimeoutException` on the first line indicates to callers of this method should implement the error handling themselves or should escalate it upwards. 
 

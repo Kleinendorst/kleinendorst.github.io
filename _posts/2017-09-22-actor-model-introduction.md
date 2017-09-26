@@ -210,7 +210,7 @@ public class WeatherService extends AbstractActor {
    private long maxLatency = 3000;
 
    /**
-    * Mock implementation that will fake a request.
+    * Fake implementation that will fake a request.
     */
    private void fetchWeather(FetchTemperatureRequest r) {
        long latency = (long) (Math.random() * maxLatency); // <- 1

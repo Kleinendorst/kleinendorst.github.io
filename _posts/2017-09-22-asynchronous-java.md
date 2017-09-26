@@ -79,22 +79,22 @@ class WeatherService {
    WeatherService() { }
 
    double fetchPredictedTemperature(String location) {
-       return fetchMock(5000, 30);
+       return fakeFetch(5000, 30);
    }
 
    double fetchActualTemperature(String location) {
-       return fetchMock(7000, 30);
+       return fakeFetch(7000, 30);
    }
 
-   private double fetchMock(long mockLatency,
-                            double mockMaxTemperature) {
+   private double fakeFetch(long latency,
+                            double maxTemperature) {
        try {
-           Thread.sleep(mockLatency);
+           Thread.sleep(latency);
        } catch (InterruptedException e) {
            e.printStackTrace();
        }
        return Math.random() *
-               mockMaxTemperature;
+               maxTemperature;
    }
 }
 {% endhighlight %}
