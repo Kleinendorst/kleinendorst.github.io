@@ -18,7 +18,7 @@ int a = 2 * 60 + 3;
 {% endhighlight %}
 
 Ordering in this example is resolved in mathematically correct fashion, but languages also have some rules of their own[^1]. Whenever an expression is finished, the next runnable line of code is executed. Notice that this next line of code can only be executed once the first line of code has finished executing, even if the second line isn’t dependent on the first line. 
-In simple examples, like the first example, this doesn’t pose much of a problem, but consider the following example.
+In simple examples, like the first example, this doesn’t pose much of a problem, but consider the following example:
 
 {% highlight java %}
 String location = "Utrecht";
