@@ -1,10 +1,10 @@
 ---
-layout: default
+layout: post
 title:  "Asynchronous Java"
 date:   2017-09-22 14:30:00
 categories: main
+comments: true
 ---
-# Asynchronous Java
 In order to properly scale applications, asynchronous task handling is key. The principal of asynchronous systems can be achieved on both application and architectural level. In this article we will discus blocking IO, and its disadvantages as well as how to implement nonblocking IO. The examples in this article will be written in Java, but applies to most modern programming languages.
 
 ## Blocking IO

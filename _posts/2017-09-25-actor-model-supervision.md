@@ -1,10 +1,10 @@
 ---
-layout: default
+layout: post
 title:  "Actor Model - Supervision"
 date:   2017-09-25 10:30:00
 categories: main
+comments: true
 ---
-# Actor Model - Supervision
 In this article we’ll discuss the supervision strategy concept. We’ll discover the different kinds of supervision strategies and how they make your actors more fault resilient. 
 
 ## The problem

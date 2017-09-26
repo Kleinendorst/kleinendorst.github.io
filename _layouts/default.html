@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  
-  {% include head.html %}
 
-  <body>
-    {% include page-header.html %}
+{% include head.html %}
 
-    <section class="main-content">
-      
-      {{ content }}
+<body>
+	{% include page-header.html %}
 
-      {% include about-author.html %}
+	<section class="main-content">
 
-      {% include page-footer.html %}
+		{{ content }}
 
-    </section>
+		{% include about-author.html %}
 
-  </body>
+		{% include page-footer.html %}
+
+	</section>
+	
+	<script id="dsq-count-scr" src="//kleinendorst-github-io.disqus.com/count.js" async></script>
+</body>
 </html>

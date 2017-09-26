@@ -1,10 +1,10 @@
 ---
-layout: default
+layout: post
 title:  "Actor Model - Introduction"
 date:   2017-09-22 15:30:00
 categories: main
+comments: true
 ---
-# Actor Model - Introduction
 In this article we’ll discuss the Actor model. The actor model has been around since 1973, and was created to ease the development of big asynchronous systems, which didn’t exist at that time. Actors decouple software entities even further than Objects can do in OOP[^1] systems. Actors are a good way to solve concurrency problems like the ones we discussed in the previous article. Let’s first see how the Actor model works.
 
 ## The actor model

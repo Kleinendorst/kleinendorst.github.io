@@ -18,3 +18,9 @@ theme: jekyll-theme-cayman
 
 #Others
 markdown: kramdown
+
+# Comments
+comments:
+  provider: disqus
+disqus:
+  short_name: kleinendorst-github-io
