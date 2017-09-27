@@ -187,7 +187,7 @@ private void comparePrediction(ComparePredictionRequest r) {
 
 
 
-1. We keep track of currently open tasks in the WeatherManager. We create a BiMap which is a map from Google’s Guava project that supports lookups with both keys and values. 
+1. We keep track of currently open tasks in the WeatherManager. 
 
 2. We create a new actor by calling getContext().actorOf(). getContext() is a function that is inherited from AbstractActor and its information is used to create an actor that is a child of the current (WeatherManager) actor. The second argument is the name of actors as visible in its location address.
 
