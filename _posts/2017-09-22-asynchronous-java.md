@@ -76,8 +76,6 @@ This weather object has setters for both the actual and predicted value, wheneve
 
 {% highlight java %}
 class WeatherService {
-   WeatherService() { }
-
    double fetchPredictedTemperature(String location) {
        return fakeFetch(5000, 30);
    }
@@ -93,8 +91,7 @@ class WeatherService {
        } catch (InterruptedException e) {
            e.printStackTrace();
        }
-       return Math.random() *
-               maxTemperature;
+       return Math.random() * maxTemperature;
    }
 }
 {% endhighlight %}
@@ -194,8 +191,7 @@ Let´s recap: By using multi-threading we are able to run tasks in parallel. The
 
 Also mutable variables may become faulty if accessed by threads at the same time. In order to prevent corrupt data one can use Java’s Atomic variable types[^4] or implement locking[^5], both increase complexity in large systems. Also bugs that result from accessing variables on different threads are hard to debug.
 
-In the next article we’ll have a look at the basics of the Actor system, a model that was created specially for asynchronous computing. We’ll discover how the system works, how it solves concurrency problems and how to implement it in Java.
-
+In the [next article]({{ page.next.url }}) we’ll have a look at the basics of the Actor system, a model that was created specially for asynchronous computing. We’ll discover how the system works, how it solves concurrency problems and how to implement it in Java.
 
 
 ----------------

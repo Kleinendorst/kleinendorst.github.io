@@ -268,7 +268,7 @@ By storing more information about current running tasks, supervisors can be more
 ## Conclusion
 By thinking about supervision strategies in our actors, we can configure the system in such a way that failing tasks could be sensibly retried and errors are handled at the right level. Failing components don’t crash the entire system (in most cases) and only corrupted data will be reprocessed. The actor system pushes the developer to decouple their entities.
 
-In the next article we'll discuss Reactive streams. 
+In the [next article]({{ page.next.url }}) we'll discuss Reactive streams. 
 
 ------------------------
 [^1]: Instructions can be found [here](http://doc.akka.io/docs/akka/snapshot/scala/general/configuration.html).
