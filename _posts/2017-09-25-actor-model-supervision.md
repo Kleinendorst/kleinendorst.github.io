@@ -240,7 +240,7 @@ private void handleResponse(ComparePredictionResponse r) {
 
 private void terminated(Terminated t) {
    ActorRef terminatedActor = t.getActor();
-   log.error("Task {} failed", actorLookup.inverse().get(terminatedActor)); // <- 3
+   log.error("Task failed"); // <- 3
    actorLookup.values().remove(terminatedActor); // <- 3
 }
 

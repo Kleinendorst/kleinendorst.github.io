@@ -174,7 +174,7 @@ The message received by this actor is the same as that of the `WeatherManager`. 
 In the `WeatherManager` class we create a `PredictionCompareTask` every time we receive a request, let’s rewrite the `comparePrediction()` function:
 
 {% highlight java %}
-private BiMap<Long, ActorRef> actorLookup = HashBiMap.create(); // <- 1
+private private Map<Long, ActorRef> actorLookup = new HashMap<>(); // <- 1
 
 private void comparePrediction(ComparePredictionRequest r) {
    log.info("forwarding predictionRequest to child: task {}", r.requestId);
