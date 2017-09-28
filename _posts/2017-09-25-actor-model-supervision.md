@@ -5,6 +5,8 @@ date:   2017-09-25 10:30:00
 categories: main
 comments: true
 ---
+> Source code for this article can be found at [Github](https://github.com/Kleinendorst/supervisionexample).
+
 In this article we’ll discuss the supervision strategy concept. We’ll discover the different kinds of supervision strategies and how they make your actors more fault resilient. 
 
 ## The problem
@@ -31,7 +33,7 @@ private double callRestForTemp(String location, long timeout)
 }
 {% endhighlight %}
 
-This shows the fake implementation for the rest call. First we create a random duration that the thread must wait between 0 and 6000. Then we actually wait that time and check if the waiting time was longer than the actual timeout. If it waited longer than the timeout we throw an error (`java.util.concurrent.TimeoutException`) otherwise return a random temperature.
+This shows the fake implementation for the REST API call. First we create a random duration that the thread must wait between 0 and 6000. Then we actually wait that time and check if the waiting time was longer than the actual timeout. If it waited longer than the timeout we throw an error (`java.util.concurrent.TimeoutException`) otherwise return a random temperature.
 
 Methods that can throw an error, and don’t handle the error themselves, include the exceptions it can throw in the call signature. The `throws TimeoutException` on the first line indicates to callers of this method should implement the error handling themselves or should escalate it upwards. 
 
@@ -52,7 +54,7 @@ double getPredTemp(String location) {
 }
 {% endhighlight %}
 
-This doesn’t make much sense, the caller of `getPredTemp` might think the predicted temperature was 0 °C when our rest call fails. In this case escalating the error is a better solution:
+This doesn’t make much sense, the caller of `getPredTemp` might think the predicted temperature was 0 °C when our REST API call fails. In this case escalating the error is a better solution:
 
 {% highlight java %}
 double getPredTemp(String location) throws TimeoutException {
@@ -63,7 +65,7 @@ double getPredTemp(String location) throws TimeoutException {
 }
 {% endhighlight %}
 
-And catching it in the main method:
+And catching it in the `main()` method:
 
 {% highlight java %}
 try {
@@ -75,10 +77,10 @@ try {
 
 To summarize: thrown errors can be handled at the current level or be escalated to handle higher in the call stack. 
 
-Now the problem with this approach in the actor system is named in the last sentence: *“escalated to handle higher in the call stack.”*. Tasks that are delegated to an actor are requested in a fire and forget fashion. The actor that receives the message doesn’t run in the same thread and has it’s owners call stack. When something nasty happens in this call stack, there is no way to escalate this error to it’s callee.
+Now the problem with this approach in the actor system is named in the last sentence: *“escalated to handle higher in the call stack”*. Tasks that are delegated to an actor are requested in a fire and forget fashion. The actor that receives the message doesn’t run in the same thread and has its own call stack. When something nasty happens in this call stack, there is no way to escalate this error to its caller.
 
 ## Supervision
-In actor systems, try/catch blocks are rarely written and considered bad practice in most cases. The prefered method is to fail the actor entirely and let its parent decide what to do next. Each actor defines a so called “supervision strategy” which is configuration that tells the actor how to handle failing children. Let’s look how this is configured:
+In actor systems, try/catch blocks are rarely written and considered bad practice in most cases. The preferred method is to fail the actor entirely and let its parent decide what to do next. Each actor defines a so called “supervision strategy” which is configuration that tells the actor how to handle failing children. Let’s look how this is configured:
 
 {% highlight java %}
 @Override
@@ -108,7 +110,7 @@ We can choose between `OneForOneStrategy` and a `AllForOneStrategy`. The `OneFor
 
 Next we can choose between four options per kind of exception thrown:
 
-1. **Restart** - creates a new actor instance which can be accessed by the same `ActorRef`. By restarting, the state of the previous actor instance was lost (akka provides a persistency mechanism to prevent this, but we won’t cover it in this post). Notice that it’s mailbox is preserved, but loses the message it was processing. 
+1. **Restart** - creates a new actor instance which can be accessed by the same `ActorRef`. By restarting, the state of the previous actor instance was lost (Akka provides a persistency mechanism to prevent this, but we won’t cover it in this post). Notice that it’s mailbox is preserved, but loses the message it was processing. 
 2. **Stop** - Stops the actor instance entirely and doesn’t restart it. 
 3. **Resume** - the actor reference discards the message it was working on and  continuous processing its mailbox. State is preserved because the actor is never destroyed.  
 4. **Escalate** - The supervisor will fail itself thus escalating the problem to *its* supervisor. 
@@ -201,13 +203,13 @@ public SupervisorStrategy supervisorStrategy() {
 
 When we run this code until one of the `WeatherService` actors fails, we are presented with the following logs:
 
-`...[weather-manager/task-0] stopping`
-
-`...[weather-manager/task-0/fetch-predicted] stopping`
-
-`...[weather-manager/task-0/fetch-actual] stopping`
-
-`...[weather-manager/task-0/] stopped`
+> `...[weather-manager/task-0] stopping`
+> 
+> `...[weather-manager/task-0/fetch-predicted] stopping`
+> 
+> `...[weather-manager/task-0/fetch-actual] stopping`
+> 
+> `...[weather-manager/task-0/] stopped`
 
 The `WeatherManager` stops the `PredictionCompareTask` and this results in the recursive shutdown of its children. When the children are stopped the `PredictionCompareTask` is stopped as well. 
 

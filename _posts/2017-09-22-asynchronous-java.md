@@ -32,9 +32,9 @@ if (actual < predicted) {
 }
 {% endhighlight %}
 
-The weather service will make a REST API request to retrieve information. Retrieving information via REST is a (relatively) time consuming task. In this example the predicted temperature may only be retrieved once the current temperature is retrieved. These tasks could easily be retrieved in parallel.
+The `WeatherService` will make a REST API request to retrieve information. Retrieving information via REST is a (relatively) time consuming task. In this example the predicted temperature may only be retrieved once the current temperature is retrieved. These tasks could easily be retrieved in parallel.
 
-When the call stack is waiting for a return value, in this case from the weather service, it can’t execute additional code. In our case this means that our task will take more time. In the case of a visual application, the GUI will freeze and not respond to user input. To solve these kind of issues, we use multi-threading.
+When the call stack is waiting for a return value, in this case from the `WeatherService`, it can’t execute additional code. In our case this means that our task will take more time. In the case of a visual application, the GUI will freeze and not respond to user input. To solve these kind of issues, we use multi-threading.
 
 ## Multi-threading NIO
 NIO (non blocking IO) is achieved by reserving software threads[^2]. Reserving threads is not supported by all modern programming languages[^3], but it is supported in Java. Let’s look at an example:
@@ -72,7 +72,7 @@ class Weather {
 }
 {% endhighlight %}
 
-This weather object has setters for both the actual and the predicted value. Whenever both values are not null, it will access its values. Now look at the fake implementation of the weather service:
+This `Weather` object has setters for both the actual and the predicted value. Whenever both values are not `null`, it will access its values. Now look at the fake implementation of the `WeatherService`:
 
 {% highlight java %}
 class WeatherService {
@@ -130,11 +130,12 @@ public class Main {
 
 The code doesn’t use threading in any way and produces the following output:
 
-`Start getting the actual temperature:: running for: 11ms`
+> `Start getting the actual temperature:: running for: 11ms`
+>
+> `Start getting the predicted temperature:: running for: 7016ms`
+>
+> `It's colder than predicted.:: running for: 12016ms` 
 
-`Start getting the predicted temperature:: running for: 7016ms`
-
-`It's colder than predicted.:: running for: 12016ms`
 
 Notice that it starts fetching the predicted temperature only when the current temperature was already fetched. Now let’s rewrite the `Main` class so that the fetching can happen in parallel:
 
@@ -176,18 +177,18 @@ public class Main {
 }
 {% endhighlight %}
 
-We create `Runnable` instances which will be the input for a new `Thread` object we create. These runnables will perform their task inside a thread allocated by the JVM[^4], and therefore, will be ran in parallel. Now let’s compare the console output and see if this code was faster to execute:
+We create `Runnable` instances which will be the input for a new `Thread` object we create. These `Runnable` objects will perform their task inside a thread allocated by the JVM[^4], and therefore, will be ran in parallel. Now let’s compare the console output and see if this code was faster to execute:
 
 
-`Start getting the actual temperature:: running for: 12ms`
+> `Start getting the actual temperature:: running for: 12ms`
+> 
+> `Start getting the predicted temperature:: running for: 16ms`
+> 
+> `Press any key to stop.`
+> 
+> `It's colder than predicted.:: running for: 7017ms`
 
-`Start getting the predicted temperature:: running for: 16ms`
-
-`Press any key to stop.`
-
-`It's colder than predicted.:: running for: 7017ms`
-
-There are also some downsides to using multithreading. We have to check after each runnable whether both values have been returned, because we don't know the finishing order of runnables.
+There are also some downsides to using multithreading. We have to check after each `Runnable` whether both values have been returned, because we don't know the finishing order of `Runnable` objects.
 
 Also mutable variables may become faulty if accessed by threads at the same time. In order to prevent corrupt data, one can use Java’s atomic variable types[^5] or implement locking[^6]. Both increase complexity in large systems. Also, bugs that result from accessing variables on different threads are hard to find.
 

@@ -6,9 +6,9 @@ categories: main
 comments: true
 ---
 
-> EDIT: Code for this and the [next article]({{page.next.url}}) can be found at [Github](https://github.com/Kleinendorst/supervisionexample).
+> Source code for this article can be found at [Github](https://github.com/Kleinendorst/supervisionexample).
 
-The actor model has been around since 1973, and was created to ease the development of big asynchronous systems, which didn’t exist at that time. Actors decouple software entities even further than Objects can do in OOP[^1] systems. Actors are a good way to solve concurrency problems like the ones we discussed in the previous article. Let’s first see how the Actor model works.
+The actor model has been around since 1973, and was created to ease the development of big asynchronous systems, which didn’t exist at that time. Actors decouple software entities even further than objects can do in OOP[^1] systems. Actors are a good way to solve concurrency problems like the ones we discussed in the previous article. Let’s first see how the actor model works.
 
 ## The actor model
 A software application implementing the actor system will have actors as logical entities. Actors are software entities with the following properties:
@@ -27,7 +27,7 @@ The delegation of tasks continuous until tasks are small enough to handle in a s
 
 Because each actor runs in its own thread, jobs that get delegated to children are automatically run in parallel. Multithreading is actually the key features of the actor based system. The other features of the actor (mainly) make managing this multithreaded approach possible.
 
-By encapsulating its own state which may only be accessed by the Actors single thread,  Atomic objects and the use of locking are not needed. Consider a group of people having to finish a report. They first all work inside the same document and it quickly becomes a mess. Nobody knows which version to merge with what version of their peers. This group now chooses a leader (supervisor) who is responsible for delegating chapters and merging the final result. 
+By encapsulating its own state which may only be accessed by the actors single thread,  Atomic objects and the use of locking are not needed. Consider a group of people having to finish a report. They first all work inside the same document and it quickly becomes a mess. Nobody knows which version to merge with what version of their peers. This group now chooses a leader (supervisor) who is responsible for delegating chapters and merging the final result. 
 
 Communication between actors can’t happen with method calls. Whenever a method is called it enters the call stack, and would thus be blocking. Instead actors send messages to each other. These messages are send in a fire-and-forget fashion. If a return value is suspected, the recipient of that message should send a message back containing that return value. 
 
@@ -38,7 +38,7 @@ Coming back to the economical organization, consider a manager that knows nothin
 try/catch clauses are not helpful when working across threads. As we’ll see in the [next article]({{page.next.url}}) supervisors are also responsible for handling failures of their children. 
 
 ## Practical example
-Let’s try to solve our weather problem by the use of actors. In this example we will work with Java again. To use actors in Java we can use the libraries provided by Akka[^2]. 
+Let’s try to solve our weather problem by the use of actors. In this example we will work with Java again. To use actors in Java we can use the libraries provided by Akka[^2].
 
 Our actor diagram will look like this:
 
@@ -50,7 +50,7 @@ Let’s walk over each of the steps:
 
 2. The `WeatherManager` will create a child actor called `PredictionCompareTask`. This actor is responsible for the task of fetching the actual and predicted temperature. In an actor system tasks are often prescribed their own actor, these tasks can therefore run in parallel. 
 
-3. We want to execute fetching the actual and predicted temperature in parallel, this means that the `PredictionCompareTask` will create two child actors of type WeatherService. These child actors are of the same type and can either request the predicted or actual temperature. 
+3. We want to execute fetching the actual and predicted temperature in parallel, this means that the `PredictionCompareTask` will create two child actors of type `WeatherService`. These child actors are of the same type and can either request the predicted or actual temperature. 
 
 4. When the `WeatherService` has finished collecting data it returns that data to its caller, after which it will destroy itself, cleaning up its resources.
 
@@ -105,19 +105,19 @@ class WeatherManager extends AbstractActor {
 
 {% endhighlight %}
 
-This is the code we need for the weather manager for now. By extending `akka.actor.AbstractActor`, this object can be used as an actor in the Akka system (we created in the main class). Let’s look at some common building blocks the actor exists of:
+This is the code we need for the `WeatherManager` for now. By extending `akka.actor.AbstractActor`, this object can be used as an actor in the Akka system (we created in the `Main` class). Let’s look at some common building blocks the actor exists of:
 
 1. Akka provides its own logging adapter. It logs messages to the console (non-blocking) and logs the actor adres in the system, which might be useful for debugging purposes. We will discus the actor adresses later. 
 
-2. Actors aren’t created with the new keyword, instead they are created by the `Props.create()`. The props factory function is something often used with Akka actors.
+2. Actors aren’t created with the `new` keyword, instead they are created by the `Props.create()`. The props factory function is something often used with Akka actors.
 
 3. The inner class forms the definition of a message then is send to this actor (but may also be send between other actors). In most cases messages include a `requestId` which is used by the sending party to match responded messages. Here we also provide the location for which we want to receive the predicted and actual weather. 
 
-4. The receive builder is the only abstract method of `AbstractActor`, which means that we must overwrite it. The Receive object that’s returned will contain the logic for handling messages. If we want an empty Receive object we would write the following snippet: return `receiveBuilder().build();` The `match()` function makes that whenever the actor receives a `ComparePredictionRequest` it will delegate it to the comparePrediction()function.
+4. The receive builder is the only abstract method of `AbstractActor`, which means that we must overwrite it. The `Receive` object that’s returned will contain the logic for handling messages. If we want an empty `Receive` object we would write the following snippet: return `receiveBuilder().build();` The `match()` function makes that whenever the actor receives a `ComparePredictionRequest` it will delegate it to the `comparePrediction()` function.
 
 5. In this function we will handle the message, for now it just outputs the request parameters, but we will fix this soon.
 
-Now to create this actor and tell it to do its job we write the following code in the main function:
+Now to create this actor and tell it to do its job we write the following code in the `main()` function:
 
 {% highlight java %}
 ActorSystem system = ActorSystem.create("weather");
@@ -125,17 +125,17 @@ ActorRef weatherManager = system.actorOf(WeatherManager.props(), "weather-manage
 weatherManager.tell(new WeatherManager.ComparePredictionRequest(0L, "Eindhoven"), ActorRef.noSender());
 {% endhighlight %}
 
-We first create the weatherManager actor using the factory function we saw earlier. Now notice that the ActorRef it returns is a reference to the actor. This reference is special in that Akka will automatically replace it when the actor is replaced (mainly when a new instance is restarted on failure). 
+We first create the `WeatherManager` actor using the factory function we saw earlier. Now notice that the `ActorRef` it returns is a reference to the actor. This reference is special in that Akka will automatically replace it when the actor is replaced (mainly when a new instance is restarted on failure). 
 
 We call the `tell()` function to send a request message to the actor. When run we receive the following output:
 
-`[INFO] [09/19/2017 09:58:44.080] [weather-akka.actor.default-dispatcher-3]`
+> `[INFO] [09/19/2017 09:58:44.080] [weather-akka.actor.default-dispatcher-3]`
+> 
+> `[akka://weather/user/weather-manager] requestId: 0: Requested weather prediction for Eindhoven.`
 
-`[akka://weather/user/weather-manager] requestId: 0: Requested weather prediction for Eindhoven.`
+Because the `WeatherManager` runs in its own thread, the app is never blocked. The thread it’s run on can be seen in the logs (`dispatcher-3`). We can also see the address of the actor that printer the message (`akka://weather/user/weather-manager`). When connecting the http services Akka provides, we can even send messages to actors between JVM’s via the akka protocol. 
 
-Because the `WeatherManager` runs in its own thread, the main app is never blocked. The thread it’s run on can be seen in the logs (`dispatcher-3`). We can also see the address of the actor that printer the message (`akka://weather/user/weather-manager`). When connecting the http services Akka provides, we can even send messages to actors between JVM’s via the akka protocol. 
-
-One problem we face is that messages can only be send between actors, meaning that we cannot receive replies from our main class. When we send the `ComparePredictionRequest` from our main class we didn't provide a sending actor (`Actor.noRef()`) so we can't receive any responses in our `Main` class due to the lack of a mailbox of the `Main` class. This means that the response message should be send via a (blocking) method call to the main class. These situations, where multiple threads must run the same code, should be avoided at all cost. This is exactly why we designed the `WeatherManager` to finish handling this message (by printing its return value).
+One problem we face is that messages can only be send between actors, meaning that we cannot receive replies from our `Main` class. When we send the `ComparePredictionRequest` from our `Main` class we didn't provide a sending actor (`Actor.noRef()`) so we can't receive any responses in our `Main` class due to the lack of a mailbox. This means that the response message should be send via a (blocking) method call to the main class. These situations, where multiple threads must run the same code, should be avoided at all cost. This is exactly why we designed the `WeatherManager` to finish handling this message (by printing its return value).
 
 Let’s continue our example by creating the actor that will run the tasks. Our task of fetching the predicted and actual weather will be executed by the children of the `PredictionCompareTask` actor. 
 
@@ -172,7 +172,7 @@ public class PredictionCompareTask extends AbstractActor {
 
 This actor will be responsible for handling one task of comparing temperatures. In this case the location is central for the task and thus provided when creating the actor with the factory function. `Props.create()` will automatically call its constructor.
 
-The message received by this actor is the same as that of the `WeatherManager`. This actor only exists as a means for the `WeatherManager` to delegate its task to, this means that these tasks run in parallel (in the runtime of the child actors). Creating actors that represent just a task is perfectly reasonable in an actorsystem. 
+The message received by this actor is the same as that of the `WeatherManager`. This actor only exists as a means for the `WeatherManager` to delegate its task to, this means that these tasks run in parallel (in the runtime of the child actors). Creating actors that represent just a task is perfectly reasonable in an actor system. 
 
 In the `WeatherManager` class we create a `PredictionCompareTask` every time we receive a request, let’s rewrite the `comparePrediction()` function:
 
@@ -190,17 +190,17 @@ private void comparePrediction(ComparePredictionRequest r) {
 
 
 
-1. We keep track of currently open tasks in the WeatherManager. 
+1. We keep track of currently open tasks in the `WeatherManager`. 
 
-2. We create a new actor by calling getContext().actorOf(). getContext() is a function that is inherited from AbstractActor and its information is used to create an actor that is a child of the current (WeatherManager) actor. The second argument is the name of actors as visible in its location address.
+2. We create a new actor by calling `getContext().actorOf(). getContext()` is a function that is inherited from `AbstractActor` and its information is used to create an actor that is a child of the current (`WeatherManager`) actor. The second argument is the name of actors as visible in its location address.
 
 When we run the code we see the following console output:
 
-`[INFO] [09/21/2017 13:25:30.630] [weather-akka.actor.default-dispatcher-3] [akka://weather/user/weather-manager] forwarding predictionRequest to child: task 0`
+> `[INFO] [09/21/2017 13:25:30.630] [weather-akka.actor.default-dispatcher-3] [akka://weather/user/weather-manager] forwarding predictionRequest to child: task 0`
+> 
+> `[INFO] [09/21/2017 13:25:30.633] [weather-akka.actor.default-dispatcher-4] [akka://weather/user/weather-manager/task-0] Received request: 0. I'm supposed to get the Eindhoven temperature.`
 
-`[INFO] [09/21/2017 13:25:30.633] [weather-akka.actor.default-dispatcher-4] [akka://weather/user/weather-manager/task-0] Received request: 0. I'm supposed to get the Eindhoven temperature.`
-
-All is in order and we can start implementing the WeatherService. The `WeatherService` will be an Actor that calls the REST Api and returns the result. The `WeatherService` can fetch both the predicted and actual temperatures. 
+All is in order and we can start implementing the `WeatherService`. The `WeatherService` will be an actor that calls the REST API and returns the result. The `WeatherService` can fetch both the predicted and actual temperatures. 
 
 In our example we will create two instances of the `WeatherService` in the `PredictionCompareTask` and send different messages to each, resulting in the services to perform the right task. Let’s build the `WeatherService`:
 
@@ -235,7 +235,7 @@ public class WeatherService extends AbstractActor {
 }
 {% endhighlight %}
 
-Some code is omitted for readability. In this example we won’t fetch any real data, but we simulate it, Akka throws errors when using `Thread.sleep()` so instead we use the scheduler . When we have “fetched” the temperature we will return it to the sender. 
+Some code is omitted for readability. In this example we won’t fetch any real data, but we simulate it, Akka throws errors when using `Thread.sleep()` so instead we use the `Scheduler` . When we have “fetched” the temperature we will return it to the sender. 
 
 1. We create a random temperature to send back. The scheduler sends the messages within 3 seconds thanks to the random latency. 
 
@@ -308,19 +308,19 @@ private void handleResponse(ComparePredictionResponse r) {
 
 When we run this program we receive the following logs:
 
-`... forwarding predictionRequest to child: task 0`
-
-`... Received request: 0. I'm supposed to get the Eindhoven temperature.`
-
-`... request 0, started fetching actual temperature`
-
-`... request 0, started fetching predicted temperature`
-
-`... Received response of the actual temperature: 23.445820165556096 degrees`
-
-`... Received response of the predicted temperature: 24.308724433245 degrees`
-
-`... Finished request 0 :: temp in Eindhoven were predicted as 24.308724433245 and was 23.445820165556096`
+> `... forwarding predictionRequest to child: task 0`
+> 
+> `... Received request: 0. I'm supposed to get the Eindhoven temperature.`
+> 
+> `... request 0, started fetching actual temperature`
+> 
+> `... request 0, started fetching predicted temperature`
+> 
+> `... Received response of the actual temperature: 23.445820165556096 degrees`
+> 
+> `... Received response of the predicted temperature: 24.308724433245 degrees`
+> 
+> `... Finished request 0 :: temp in Eindhoven were predicted as 24.308724433245 and was 23.445820165556096`
 
 We can send multiple messages to the `WeatherManager` instance and we’ll see that each `ComparePredictionRequest` is also processed in parallel. The big advantage of using the actor system here is that, although we didn’t really had to think about concurrency, we created a system that parallels a couple of subtasks. Running our task 100 times will finish in exactly the same time as running it once (given that our system has enough threads/processing power), that’s a 100x speed increase when compared to a synchronous system.
 
