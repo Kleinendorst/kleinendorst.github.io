@@ -216,7 +216,7 @@ public class WeatherService extends AbstractActor {
     * Fake implementation that will fake a request.
     */
    private void fetchWeather(FetchTemperatureRequest r) {
-       long latency = Math.random() * maxLatency; // <- 1
+       double latency = Math.random() * maxLatency; // <- 1
        double temperature = Math.random() * maxTemp;  // <- 1
 
       log.info("request {}, started fetching {} temperature", r.requestId, r.location);

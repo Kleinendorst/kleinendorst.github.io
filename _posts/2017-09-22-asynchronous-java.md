@@ -5,17 +5,17 @@ date:   2017-09-22 14:30:00
 categories: main
 comments: true
 ---
-In order to properly scale applications, asynchronous task handling is key. The principal of asynchronous systems can be achieved on both application and architectural level. In this article we will discuss blocking IO and its disadvantages, as well as how to implement nonblocking IO. The examples in this article will be written in Java, but apply to most modern programming languages.
+In order to properly scale applications, asynchronous task handling is key. The principal of asynchronous systems can be achieved on both application and architectural level. In this article we will discuss blocking I/O and its disadvantages, as well as how to implement nonblocking I/O. The examples in this article will be written in Java, but apply to most modern programming languages.
 
-## Blocking IO
+## Blocking I/O
 In source code the compiler searches for an order in which to resolve expressions. The compiler keeps track of its current tasks in a FILO (first in last out) array called the "call stack". Let’s look at how this works: 
 
-{% highlight java %}
+```java
 int a = 2 * 60 + 3;
 // --> 2 * 60 = 120
 // --> 120 + 3 = 123
 // --> writes 123 to space a in memory
-{% endhighlight %}
+```
 
 Ordering in this example is resolved in a mathematically correct fashion, but languages also have some rules of their own[^1]. Whenever an expression is finished, the next runnable line of code is executed. Notice that this next line of code can only be executed once the first line of code has finished executing, even though the second line isn’t dependent on the first line. 
 In simple examples, like the first example, this doesn’t pose much of a problem, but consider the following example:
@@ -37,7 +37,7 @@ The `WeatherService` will make a REST API request to retrieve information. Retri
 When the call stack is waiting for a return value, in this case from the `WeatherService`, it can’t execute additional code. In our case this means that our task will take more time. In the case of a visual application, the GUI will freeze and not respond to user input. To solve these kind of issues, we use multi-threading.
 
 ## Multi-threading NIO
-NIO (non blocking IO) is achieved by reserving software threads[^2]. Reserving threads is not supported by all modern programming languages[^3], but it is supported in Java. Let’s look at an example:
+NI/O (non blocking I/O) is achieved by reserving software threads[^2]. Reserving threads is not supported by all modern programming languages[^3], but it is supported in Java. Let’s look at an example:
 
 {% highlight java %}
 class Weather {
