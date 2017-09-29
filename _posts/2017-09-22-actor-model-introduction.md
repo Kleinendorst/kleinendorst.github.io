@@ -64,13 +64,13 @@ Let’s walk over each of the steps:
 
 First we create the `ActorSystem`:
 
-{% highlight java %}
+``` java
 ActorSystem system = ActorSystem.create("weather");
-{% endhighlight %}
+```
 
 A Java application can have any number of actor systems running in the JVM but only having one logic tree is recommended. We will now add actors to the actor system in an hierarchical order. We start with a management layer which will manage the fetching of weather data. 
 
-{% highlight java %}
+``` java
 class WeatherManager extends AbstractActor {
    private final LoggingAdapter log // <-- 1
            = Logging.getLogger(getContext().getSystem(), this);
@@ -102,8 +102,7 @@ class WeatherManager extends AbstractActor {
        }
    }
 }
-
-{% endhighlight %}
+```
 
 This is the code we need for the `WeatherManager` for now. By extending `akka.actor.AbstractActor`, this object can be used as an actor in the Akka system (we created in the `Main` class). Let’s look at some common building blocks the actor exists of:
 
@@ -119,19 +118,21 @@ This is the code we need for the `WeatherManager` for now. By extending `akka.ac
 
 Now to create this actor and tell it to do its job we write the following code in the `main()` function:
 
-{% highlight java %}
+``` java
 ActorSystem system = ActorSystem.create("weather");
 ActorRef weatherManager = system.actorOf(WeatherManager.props(), "weather-manager");
-weatherManager.tell(new WeatherManager.ComparePredictionRequest(0L, "Eindhoven"), ActorRef.noSender());
-{% endhighlight %}
+weatherManager.tell(new WeatherManager.ComparePredictionRequest(0L, "Eindhoven"), 
+                                                ActorRef.noSender());
+```
 
 We first create the `WeatherManager` actor using the factory function we saw earlier. Now notice that the `ActorRef` it returns is a reference to the actor. This reference is special in that Akka will automatically replace it when the actor is replaced (mainly when a new instance is restarted on failure). 
 
 We call the `tell()` function to send a request message to the actor. When run we receive the following output:
 
-> `[INFO] [09/19/2017 09:58:44.080] [weather-akka.actor.default-dispatcher-3]`
-> 
-> `[akka://weather/user/weather-manager] requestId: 0: Requested weather prediction for Eindhoven.`
+```
+[INFO] [09/19/2017 09:58:44.080] [weather-akka.actor.default-dispatcher-3]
+[akka://weather/user/weather-manager] requestId: 0: Requested weather prediction for Eindhoven.
+```
 
 Because the `WeatherManager` runs in its own thread, the app is never blocked. The thread it’s run on can be seen in the logs (`dispatcher-3`). We can also see the address of the actor that printer the message (`akka://weather/user/weather-manager`). When connecting the http services Akka provides, we can even send messages to actors between JVM’s via the akka protocol. 
 
@@ -139,7 +140,7 @@ One problem we face is that messages can only be send between actors, meaning th
 
 Let’s continue our example by creating the actor that will run the tasks. Our task of fetching the predicted and actual weather will be executed by the children of the `PredictionCompareTask` actor. 
 
-{% highlight java %}
+``` java
 public class PredictionCompareTask extends AbstractActor {
    private final LoggingAdapter log =
            Logging.getLogger(getContext().getSystem(), this);
@@ -168,7 +169,7 @@ public class PredictionCompareTask extends AbstractActor {
                .build();
    }
 }
-{% endhighlight %}
+```
 
 This actor will be responsible for handling one task of comparing temperatures. In this case the location is central for the task and thus provided when creating the actor with the factory function. `Props.create()` will automatically call its constructor.
 
@@ -176,7 +177,7 @@ The message received by this actor is the same as that of the `WeatherManager`. 
 
 In the `WeatherManager` class we create a `PredictionCompareTask` every time we receive a request, let’s rewrite the `comparePrediction()` function:
 
-{% highlight java %}
+``` java
 private private Map<Long, ActorRef> actorLookup = new HashMap<>(); // <- 1
 
 private void comparePrediction(ComparePredictionRequest r) {
@@ -186,9 +187,7 @@ private void comparePrediction(ComparePredictionRequest r) {
    actorLookup.put(r.requestId, task);
    task.tell(r, getSelf());
 }
-{% endhighlight %}
-
-
+```
 
 1. We keep track of currently open tasks in the `WeatherManager`. 
 
@@ -196,15 +195,16 @@ private void comparePrediction(ComparePredictionRequest r) {
 
 When we run the code we see the following console output:
 
-> `[INFO] [09/21/2017 13:25:30.630] [weather-akka.actor.default-dispatcher-3] [akka://weather/user/weather-manager] forwarding predictionRequest to child: task 0`
-> 
-> `[INFO] [09/21/2017 13:25:30.633] [weather-akka.actor.default-dispatcher-4] [akka://weather/user/weather-manager/task-0] Received request: 0. I'm supposed to get the Eindhoven temperature.`
+```
+[INFO] [09/21/2017 13:25:30.630] [weather-akka.actor.default-dispatcher-3] [akka://weather/user/weather-manager] forwarding predictionRequest to child: task 0
+[INFO] [09/21/2017 13:25:30.633] [weather-akka.actor.default-dispatcher-4] [akka://weather/user/weather-manager/task-0] Received request: 0. I'm supposed to get the Eindhoven temperature.
+```
 
 All is in order and we can start implementing the `WeatherService`. The `WeatherService` will be an actor that calls the REST API and returns the result. The `WeatherService` can fetch both the predicted and actual temperatures. 
 
 In our example we will create two instances of the `WeatherService` in the `PredictionCompareTask` and send different messages to each, resulting in the services to perform the right task. Let’s build the `WeatherService`:
 
-{% highlight java %}
+``` java
 public class WeatherService extends AbstractActor {
    private final LoggingAdapter log =
            Logging.getLogger(getContext().getSystem(), this);
@@ -233,7 +233,7 @@ public class WeatherService extends AbstractActor {
 
    … omitted createReceive(), props() and local message classes
 }
-{% endhighlight %}
+```
 
 Some code is omitted for readability. In this example we won’t fetch any real data, but we simulate it, Akka throws errors when using `Thread.sleep()` so instead we use the `Scheduler` . When we have “fetched” the temperature we will return it to the sender. 
 
@@ -248,7 +248,7 @@ Let’s add the final pieces together in the `PredictionCompareTask` actor to ge
 First we need to create the `WeatherService` child actors and request them to perform work using messages:
 
 
-{% highlight java %}
+``` java
 private void compareRequest(ComparePredictionRequest r) {
    sender = getSender();
    log.info("Received request: {}. I'm supposed to get the {} temperature."
@@ -264,7 +264,7 @@ private void compareRequest(ComparePredictionRequest r) {
    predictedFetcher.tell(new FetchTemperatureRequest(  // <- 2
            r.requestId, r.location, "predicted"), getSelf());
 }
-{% endhighlight %}
+```
 
 1. Notice that we don’t have to provide unique names for each actor, the reason behind this is that only the path should be unique. The path of this actor will include the request ID of its supervisor and thus will be unique.
 
@@ -274,7 +274,7 @@ Notice this time we don’t register the `ActorRef` references. We can count on 
 
 The code above puts the `WeatherService` actors to work, but it doesn’t handle the responses. Let’s implement:
 
-{% highlight java %}
+``` java
 private Map<String, Double> results = new HashMap<>(); // <- 1
 
 private void handleResponse(FetchTemperatureResponse r) {
@@ -293,34 +293,30 @@ private void checkFinished(long requestId) {
     sender.tell(new ComparePredictionResponse(requestId, location, results), getSelf());
     getContext().stop(self());
 }
-{% endhighlight %}
+```
 
 Whenever a message is received, `checkFinished()` checks if all its subtasks are performed, when this is the case it will send the results back to its parent and kill itself. 
 
 The last step is to actually handle the response from the `PredictionCompareTask` in the `WeatherManager`:
 
-{% highlight java %}
+``` java
 private void handleResponse(ComparePredictionResponse r) {
    log.info("Finished request {} :: temp in {} were predicted as {} and was {}"
            , r.requestId, r.location, r.report.get("predicted"), r.report.get("actual"));
 }
-{% endhighlight %}
+```
 
 When we run this program we receive the following logs:
 
-> `... forwarding predictionRequest to child: task 0`
-> 
-> `... Received request: 0. I'm supposed to get the Eindhoven temperature.`
-> 
-> `... request 0, started fetching actual temperature`
-> 
-> `... request 0, started fetching predicted temperature`
-> 
-> `... Received response of the actual temperature: 23.445820165556096 degrees`
-> 
-> `... Received response of the predicted temperature: 24.308724433245 degrees`
-> 
-> `... Finished request 0 :: temp in Eindhoven were predicted as 24.308724433245 and was 23.445820165556096`
+```
+... forwarding predictionRequest to child: task 0
+... Received request: 0. I'm supposed to get the Eindhoven temperature.
+... request 0, started fetching actual temperature
+... request 0, started fetching predicted temperature
+... Received response of the actual temperature: 23.445820165556096 degrees
+... Received response of the predicted temperature: 24.308724433245 degrees
+... Finished request 0 :: temp in Eindhoven were predicted as 24.308724433245 and was 23.445820165556096
+```
 
 We can send multiple messages to the `WeatherManager` instance and we’ll see that each `ComparePredictionRequest` is also processed in parallel. The big advantage of using the actor system here is that, although we didn’t really had to think about concurrency, we created a system that parallels a couple of subtasks. Running our task 100 times will finish in exactly the same time as running it once (given that our system has enough threads/processing power), that’s a 100x speed increase when compared to a synchronous system.
 

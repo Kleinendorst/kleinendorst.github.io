@@ -14,7 +14,7 @@ In traditional object oriented programming we write try/catch blocks when we for
 
 In Java, a hierarchical approach can be taken to error handling. Whenever handling the business logic of an error fits into the current class, you handle it with a try/catch block, and when it doesn’t you throw it to it’s caller. Let’s see how this works in practice:
 
-{% highlight java %}
+``` java
 private double callRestForTemp(String location, long timeout)
        throws TimeoutException {
    long waitingTime = (long) (Math.random() * 6000);
@@ -31,7 +31,7 @@ private double callRestForTemp(String location, long timeout)
        return Math.random() * 30; // <- temp
    }
 }
-{% endhighlight %}
+```
 
 This shows the fake implementation for the REST API call. First we create a random duration that the thread must wait between 0 and 6000. Then we actually wait that time and check if the waiting time was longer than the actual timeout. If it waited longer than the timeout we throw an error (`java.util.concurrent.TimeoutException`) otherwise return a random temperature.
 
@@ -41,7 +41,7 @@ Methods that can throw an error, and don’t handle the error themselves, includ
 
 The `getPredTemp()` function didn’t implement a try/catch block around the `callRestForTemp()` call and also didn’t escalate it to its caller by including the `TimeoutException` in its method signature. To fix this error we could write this:
 
-{% highlight java %}
+``` java
 double getPredTemp(String location) {
    try {
        return callRestForTemp(
@@ -52,28 +52,28 @@ double getPredTemp(String location) {
        return 0;
    }
 }
-{% endhighlight %}
+```
 
 This doesn’t make much sense, the caller of `getPredTemp` might think the predicted temperature was 0 °C when our REST API call fails. In this case escalating the error is a better solution:
 
-{% highlight java %}
+``` java
 double getPredTemp(String location) throws TimeoutException {
    return callRestForTemp(
            "http://weather.com/" + location + "/pred/",
            timeout
    );
 }
-{% endhighlight %}
+```
 
 And catching it in the `main()` method:
 
-{% highlight java %}
+``` java
 try {
    double temp = ws.getPredTemp(location);
 } catch (TimeoutException e) {
    System.out.println("Weather service unavailable.");
 }
-{% endhighlight %}
+```
 
 To summarize: thrown errors can be handled at the current level or be escalated to handle higher in the call stack. 
 
@@ -82,7 +82,7 @@ Now the problem with this approach in the actor system is named in the last sent
 ## Supervision
 In actor systems, try/catch blocks are rarely written and considered bad practice in most cases. The preferred method is to fail the actor entirely and let its parent decide what to do next. Each actor defines a so called “supervision strategy” which is configuration that tells the actor how to handle failing children. Let’s look how this is configured:
 
-{% highlight java %}
+``` java
 @Override
 public SupervisorStrategy supervisorStrategy() { // <- 1
    return new OneForOneStrategy( // <- 2
@@ -94,14 +94,20 @@ public SupervisorStrategy supervisorStrategy() { // <- 1
                    .matchAny(o -> escalate()) // <- 7
                    .build()); // <- 5
 }
-{% endhighlight %}
+```
 
 1. The `supervisorStrategy()` is a function existing on the `AbstractActor` and is overwritten. It expects a `SupervisorStrategy` which is a configuration object that tells this actor how it should handle failing children.
+
 2. The `supervisorStrategy()` is a factory function, there are two classes we might return that extend `SupervisorStrategy`: `OneForOneStrategy` and `AllForOneStrategy`. We’ll cover these in a minute.
+
 3. Whenever a restart strategy is selected, the failing actor will be restarted on failing. If it keeps failing, it will be retried for the number of times defined here. After the max limit was reached the actor will be stopped.
-4. The restart attempts mentioned in point 3 occur within this timeframe. 
+
+4. The restart attempts mentioned in point 3 occur within this timeframe.
+
 5. A `DeciderBuilder` will build the configuration for managing exceptions that happened in it’s children. 
+
 6. Whenever a child fails with a `TimeoutException` it will restart that child. Restarting creates a new actor instance and the old instance will lose its state. We’ll look at the different strategies in a second.
+
 7. Whenever another error than `TimeoutException` occurs the actor itself will fail, thus escalating the error.
 
 The parent shouldn’t concern itself with the business logic that happens inside the child. This is exactly why the exceptions hooks don’t hold any reference to the message the caused the child to fail.
@@ -110,10 +116,13 @@ We can choose between `OneForOneStrategy` and a `AllForOneStrategy`. The `OneFor
 
 Next we can choose between four options per kind of exception thrown:
 
-1. **Restart** - creates a new actor instance which can be accessed by the same `ActorRef`. By restarting, the state of the previous actor instance was lost (Akka provides a persistency mechanism to prevent this, but we won’t cover it in this post). Notice that it’s mailbox is preserved, but loses the message it was processing. 
+1. **Restart** - creates a new actor instance which can be accessed by the same `ActorRef`. By restarting, the state of the previous actor instance was lost (Akka provides a persistency mechanism to prevent this, but we won’t cover it in this post). Notice that it’s mailbox is preserved, but loses the message it was processing.
+
 2. **Stop** - Stops the actor instance entirely and doesn’t restart it. 
-3. **Resume** - the actor reference discards the message it was working on and  continuous processing its mailbox. State is preserved because the actor is never destroyed.  
-4. **Escalate** - The supervisor will fail itself thus escalating the problem to *its* supervisor. 
+
+3. **Resume** - the actor reference discards the message it was working on and  continuous processing its mailbox. State is preserved because the actor is never destroyed.
+
+4. **Escalate** - The supervisor will fail itself thus escalating the problem to *its* supervisor.
 
 The strategy object is returned when calling the appropriate method on the `SupervisorStrategy` which we imported statically. Besides having to return a method in these hooks we can execute any logic, but keep in mind we can’t access the failing child's state or message with which it failed. Let’s look at some examples where each strategy is suitable. 
 
@@ -127,7 +136,7 @@ The strategy object is returned when calling the appropriate method on the `Supe
 ## The weather example
 Let’s implement this knowledge into the weather example:
 
-{% highlight java %}
+``` java
 private void fetchWeather(FetchTemperatureRequest r) {
    // has ~50% change of failing.
    long latency = (long) (Math.random() * maxLatency * 2);
@@ -152,11 +161,11 @@ private void fetchWeather(FetchTemperatureRequest r) {
    }
    getContext().stop(getSelf());
 }
-{% endhighlight %}
+```
 
 Let’s edit the code of the `fetchWeather()` method. We create a random time between zero and two times the timeout for the request. We then schedule either a normal temperature response or a `“failover”` request. This request is send to itself, in which case it will throw a `TimeoutException`.
 
-{% highlight java %}
+``` java
 @Override
 public Receive createReceive() {
    return receiveBuilder()
@@ -167,7 +176,7 @@ public Receive createReceive() {
                    })
            .build();
 }
-{% endhighlight %}
+```
 
 Each time we call the rest service it has a 50% fail change. When running the program a few times with logs configured to show actor lifecycle events in the log[^1] we can discover the standard strategy used by Akka. 
 
@@ -177,7 +186,7 @@ The default behavior of these actors isn’t suitable for our example, so let’
 
 This means that we have to escalate the `TimeoutException` in the `PredictionCompareTask` and handle it in the `WeatherManager`:
 
-{% highlight java %}
+``` java
 @Override
 public SupervisorStrategy supervisorStrategy() {
    return new AllForOneStrategy(10, Duration.create(1, TimeUnit.MINUTES),
@@ -186,11 +195,11 @@ public SupervisorStrategy supervisorStrategy() {
                    .matchAny(o -> restart())
                    .build());
 }
-{% endhighlight %}
+```
 
 We simply check if one of the child actors fails, and escalate when we do. Notice that if any other exception than `TimeoutException` occurs we try to restart.It doesn’t matter if we use the `AllForOneStrategy` or the `OneForOneStrategy` because all child actors will be stopped anyway by the recursive shutdown the `WeatherManager` instantiates:
 
-{% highlight java %}
+``` java
 @Override
 public SupervisorStrategy supervisorStrategy() {
    return new OneForOneStrategy(10, Duration.create(1, TimeUnit.MINUTES),
@@ -199,26 +208,25 @@ public SupervisorStrategy supervisorStrategy() {
                    .matchAny(o -> escalate())
                    .build());
 }
-{% endhighlight %}
+```
 
 When we run this code until one of the `WeatherService` actors fails, we are presented with the following logs:
 
-> `...[weather-manager/task-0] stopping`
-> 
-> `...[weather-manager/task-0/fetch-predicted] stopping`
-> 
-> `...[weather-manager/task-0/fetch-actual] stopping`
-> 
-> `...[weather-manager/task-0/] stopped`
+```
+...[weather-manager/task-0] stopping
+...[weather-manager/task-0/fetch-predicted] stopping
+...[weather-manager/task-0/fetch-actual] stopping
+...[weather-manager/task-0/] stopped
+```
 
 The `WeatherManager` stops the `PredictionCompareTask` and this results in the recursive shutdown of its children. When the children are stopped the `PredictionCompareTask` is stopped as well. 
 
 In the current implementation the service will fail silently (apart from the logs). Let’s implement business logic in the `WeatherManager` that keep track of it’s running tasks and watches for unexpected stops:
 
-{% highlight java %}
+``` java
 class WeatherManager extends AbstractActor {
 
-…
+// …
 
 private void comparePrediction(ComparePredictionRequest r) {
    log.info("forwarding predictionRequest to child: task {}", r.requestId);
@@ -229,7 +237,7 @@ private void comparePrediction(ComparePredictionRequest r) {
    task.tell(r, getSelf());
 }
 
-…
+// …
 
 private void handleResponse(ComparePredictionResponse r) {
    actorLookup.values().remove(getSender()); // <- 2
@@ -238,7 +246,7 @@ private void handleResponse(ComparePredictionResponse r) {
            , r.requestId, r.location, r.report.get("predicted"), r.report.get("actual"));
 }
 
-…
+// …
 
 private void terminated(Terminated t) {
    ActorRef terminatedActor = t.getActor();
@@ -246,7 +254,7 @@ private void terminated(Terminated t) {
    actorLookup.values().remove(terminatedActor); // <- 3
 }
 
-…
+// …
 
 @Override
 public Receive createReceive() {
@@ -257,11 +265,14 @@ public Receive createReceive() {
            .match(Terminated.class, this::terminated) // <- 4
            .build();
 }
-{% endhighlight %}
+```
 
 1. By watching a task when created, we receive a terminated message whenever the actor stops.
+
 2. When a prediction is returned successfully: we don’t care if the actor stops. It’s not the responsibility of the `WeatherManager` to stop it’s subtasks.
+
 3. When we receive a terminated message we will log this as error. We also remove it as a running task.
+
 4. When registering actors to watch with `getContext().watch()` we receive regular `Terminated` messages.
 
 By storing more information about current running tasks, supervisors can be more verbose about failing tasks but we didn’t bother for simplicity. Notice that we use this `Terminated` approach when we want to track which actor failed. If we don’t care about the specific actor, the `SupervisorStrategy` also provides hooks.

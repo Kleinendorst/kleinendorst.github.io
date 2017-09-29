@@ -20,7 +20,7 @@ int a = 2 * 60 + 3;
 Ordering in this example is resolved in a mathematically correct fashion, but languages also have some rules of their own[^1]. Whenever an expression is finished, the next runnable line of code is executed. Notice that this next line of code can only be executed once the first line of code has finished executing, even though the second line isn’t dependent on the first line. 
 In simple examples, like the first example, this doesn’t pose much of a problem, but consider the following example:
 
-{% highlight java %}
+``` java
 String location = "Utrecht";
 WeatherService ws = new WeatherService();
 
@@ -30,7 +30,7 @@ double predicted = ws.fetchPredictedTemperature(location);
 if (actual < predicted) {
    System.out.println("It's colder than anticipated!");
 }
-{% endhighlight %}
+```
 
 The `WeatherService` will make a REST API request to retrieve information. Retrieving information via REST is a (relatively) time consuming task. In this example the predicted temperature may only be retrieved once the current temperature is retrieved. These tasks could easily be retrieved in parallel.
 
@@ -39,7 +39,7 @@ When the call stack is waiting for a return value, in this case from the `Weathe
 ## Multi-threading NIO
 NI/O (non blocking I/O) is achieved by reserving software threads[^2]. Reserving threads is not supported by all modern programming languages[^3], but it is supported in Java. Let’s look at an example:
 
-{% highlight java %}
+``` java
 class Weather {
    private Double actual;
    private Double predicted;
@@ -70,11 +70,11 @@ class Weather {
        Main.reportWithDuration(message);
    }
 }
-{% endhighlight %}
+```
 
 This `Weather` object has setters for both the actual and the predicted value. Whenever both values are not `null`, it will access its values. Now look at the fake implementation of the `WeatherService`:
 
-{% highlight java %}
+``` java
 class WeatherService {
    double fetchPredictedTemperature(String location) {
        return fakeFetch(5000, 30);
@@ -94,11 +94,11 @@ class WeatherService {
        return Math.random() * maxTemperature;
    }
 }
-{% endhighlight %}
+```
 
 In order to simulate a long response time we call `Thread.sleep()`, which just stalls all code execution for the provided number of milliseconds. Now let’s run this code in a blocking way first:
 
-{% highlight java %}
+``` java
 public class Main {
    private static LocalTime start;
 
@@ -126,20 +126,19 @@ public class Main {
        }
    }
 }
-{% endhighlight %}
+```
 
 The code doesn’t use threading in any way and produces the following output:
 
-> `Start getting the actual temperature:: running for: 11ms`
->
-> `Start getting the predicted temperature:: running for: 7016ms`
->
-> `It's colder than predicted.:: running for: 12016ms` 
-
+```
+Start getting the actual temperature:: running for: 11ms
+Start getting the predicted temperature:: running for: 7016ms
+It's colder than predicted.:: running for: 12016ms
+```
 
 Notice that it starts fetching the predicted temperature only when the current temperature was already fetched. Now let’s rewrite the `Main` class so that the fetching can happen in parallel:
 
-{% highlight java %}
+``` java
 public class Main {
    private static LocalTime start;
 
@@ -175,18 +174,16 @@ public class Main {
        System.in.read();
    }
 }
-{% endhighlight %}
+```
 
 We create `Runnable` instances which will be the input for a new `Thread` object we create. These `Runnable` objects will perform their task inside a thread allocated by the JVM[^4], and therefore, will be ran in parallel. Now let’s compare the console output and see if this code was faster to execute:
 
-
-> `Start getting the actual temperature:: running for: 12ms`
-> 
-> `Start getting the predicted temperature:: running for: 16ms`
-> 
-> `Press any key to stop.`
-> 
-> `It's colder than predicted.:: running for: 7017ms`
+```
+Start getting the actual temperature:: running for: 12ms
+Start getting the predicted temperature:: running for: 16ms
+Press any key to stop.
+It's colder than predicted.:: running for: 7017ms
+```
 
 There are also some downsides to using multithreading. We have to check after each `Runnable` whether both values have been returned, because we don't know the finishing order of `Runnable` objects.
 
