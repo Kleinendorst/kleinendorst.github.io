@@ -15,3 +15,22 @@
 	display: inline-block;
 	width: 60%;
 }
+
+.center-container {
+	text-align: center;
+}
+
+.image-container {
+	display: inline-block;
+	margin: 0 auto;
+	text-align: right;
+}
+
+.image-container img {
+	display: block;
+}
+
+.image-container label {
+	font-size: .8em;
+	color: #AAA;
+}
