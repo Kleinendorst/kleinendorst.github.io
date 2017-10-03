@@ -5,7 +5,7 @@ date:   2017-09-25 10:30:00
 categories: main
 comments: true
 ---
-> Source code for this article can be found at [Github](https://github.com/Kleinendorst/supervisionexample).
+> Source code for this article can be found on [Github](https://github.com/Kleinendorst/supervisionexample).
 
 In this article we’ll discuss the supervision strategy concept. We’ll discover the different kinds of supervision strategies and how they make your actors more fault resilient. 
 

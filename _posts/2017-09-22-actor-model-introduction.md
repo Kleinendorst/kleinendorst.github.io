@@ -6,7 +6,7 @@ categories: main
 comments: true
 ---
 
-> Source code for this article can be found at [Github](https://github.com/Kleinendorst/supervisionexample).
+> Source code for this article can be found on [Github](https://github.com/Kleinendorst/supervisionexample).
 
 The actor model has been around since 1973, and was created to ease the development of big asynchronous systems, which didn’t exist at that time. Actors decouple software entities even further than objects can do in OOP[^1] systems. Actors are a good way to solve concurrency problems like the ones we discussed in the previous article. Let’s first see how the actor model works.
 
