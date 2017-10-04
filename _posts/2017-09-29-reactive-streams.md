@@ -87,9 +87,9 @@ So what happens in this example? Reactive streams operators don’t automaticall
 
 In contrary our stream containing the `delayElements()` function will publish its data in a new thread, thus our main thread does not block when creating and subscribing to that `Flux<T>`. This means that our second log entry doesn’t include any results and print an empty result. 
 
-> Q. But isn’t there a the possibility the first statement also ran asynchronously and it simply returned all values fast enough to be included in our log call?
+> **Q.** But isn’t there a the possibility the first statement also ran asynchronously and it simply returned all values fast enough to be included in our log call?
 > 
-> A. You can check this by cloning the [code on Github](https://github.com/Kleinendorst/reactive-example) and adding: `System.out.println(Thread.currentThread());` in both subscribe callbacks and you’ll see that this isn’t the case. 
+> **A.** You can check this by cloning the [code on Github](https://github.com/Kleinendorst/reactive-example) and adding: `System.out.println(Thread.currentThread());` in both subscribe callbacks and you’ll see that this isn’t the case. 
 
 ## Operators
 The Reactive libraries come with operators that handle common operations that might take multiple lines of code normally. Some operators are the same as [Java 8’s streaming API]( http://www.oracle.com/technetwork/articles/java/ma14-java-se-8-streams-2177646.html), which is not surprising because lists of items can sometimes be handled the same way as items coming in asynchronously. Other operators are specific to the Streaming semantics, such as [`onBackpressureBuffer`](http://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#onBackpressureBuffer-int-). 
@@ -98,7 +98,7 @@ Operators always return a new `Publisher` object which makes it possible to chai
 
 {% include image.html 
   url="/assets/reactive_streams/delayonnext.png" 
-  description="source: <a href=\"https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#delayElements-java.time.Duration-\">Project Reactor Docs</a>" %}
+  description="<b>Fig. 1: </b>source: <a href=\"https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html#delayElements-java.time.Duration-\">Project Reactor Docs</a>" %}
 
 Marble diagrams show publishers as arrows. The line shows time from left to right. The perpendicular line shows when a publisher is complete. Each marble shows an emitted message. In the middle we see the function, including provided parameters. At the bottom of the diagram we see the resulting publisher outputted by the operator function. 
 
@@ -111,7 +111,10 @@ Imagine us wanting to parse [Markdown](https://nl.wikipedia.org/wiki/Markdown) i
 
 In our example `fakeInput` will be a reactive stream emitting 5 random `char` objects, each 100 ms apart and then waiting 3 seconds until we send the next chars. Let’s see this in a marble diagram.
 
-![example marble](/assets/reactive_streams/marble_diagram.svg "example marble")
+{% include image.html 
+  url="/assets/reactive_streams/marble_diagram.png" 
+  description="<b>Fig 2: </b>fakeInput marble diagram" %}
+
 
 Our goal is to not store the value somewhere but to combine them in the objects the stream returns, kind of like a `reduce` function. Then we only want to subscribe to our total value when no object came through for 200 ms, let’s look at our implementation:
 
@@ -125,19 +128,22 @@ fakeInput
 Our scan operation will work like this:
 
 {% include image.html 
-  url="/assets/reactive_streams/scan.svg" 
-  description="scan"
-  width="600px" %}
+  url="/assets/reactive_streams/scan.png" 
+  description="<b>Fig 3: </b>Scan operator" %}
 
 `scan()` works just like `reduce()`, but instead of returning one value it returns the accumulated value each time a message comes in. 
 
 Now let’s take a look at `sampleTimeout()`:
 
-![sampleTimeout](/assets/reactive_streams/sampleTimeout.svg "sampleTimeout")
+{% include image.html 
+  url="/assets/reactive_streams/sampleTimeout.png" 
+  description="<b>Fig 4: </b>Completed stream" %}
 
 Each time a new message comes in, it starts a new publisher (`Mono<T>`) which completes in 200 ms. When all `Mono<T>` objects complete it send **only** its last message to it’s new publisher. The only thing we have to do now is subscribe to this new stream and we have the functionality we wanted. The actual publisher we subscribe to will look like this:
 
-![end_result](/assets/reactive_streams/end_result.png "end_result")
+{% include image.html 
+  url="/assets/reactive_streams/end_result.png" 
+  description="<b>Fig 5: </b>Resulting stream" %}
 
 These 2 messages are exactly what we wanted to subscribe to. This took just 4 lines of code to achieve thanks to the operators provided by Project Reactor. To appreciate the true power of operators you really have to get your hands dirty with them. In fact, the stream that provided our input data for this example was created using just a few operators:
 
@@ -154,7 +160,9 @@ Back pressure is something that was recently added as part of the reactive strea
 
 Without back pressure message 4 will be put on top of the subscriber buffer. If the subscribers handles messages quicker than the publisher publishes them, the buffer will remain small.
 
-![push_model](/assets/reactive_streams/push_model.png "push_model")
+{% include image.html 
+  url="/assets/reactive_streams/push_model.png" 
+  description="<b>Fig 6: </b>push model" %}
 
 Problems arise when the publisher pushes messages quicker than the subscriber can handle. Messages will pile up in the buffer till eventually the system runs out of memory and crashes. 
 
@@ -162,13 +170,15 @@ This method is called a push mechanism because the publisher pushes the messages
 
 When using back pressure, the buffer is maintained at the publisher. A subscriber will request a message from the publisher whenever it’s done processing its messages.
 
-![pull_model](/assets/reactive_streams/pull_model.png "pull_model")
+{% include image.html 
+  url="/assets/reactive_streams/pull_model.png" 
+  description="<b>Fig 7: </b>pull model" %}
 
-> Q. So why is this better?
+> **Q.** So why is this better?
 > 
-> A. Because the publisher produces the messages, it should implement what to do when something goes wrong. Compare this with an employee (subscriber) of a supermarket that has to stock more shelves than he can manage. The manager (publisher) should fix this problem by hiring new employees or accepting emptier shelves. 
+> **A.** Because the publisher produces the messages, it should implement what to do when something goes wrong. Compare this with an employee (subscriber) of a supermarket that has to stock more shelves than he can manage. The manager (publisher) should fix this problem by hiring new employees or accepting emptier shelves. 
 
-One use case in a microservice architecture is that we can use back pressure to optimize our messaging service. By implementing one of the new [reactive](https://github.com/ScalaConsultants/reactive-rabbit) [libraries](https://github.com/akka/reactive-kafka) we can signal back to the message service if new messages could be processed. Imagine two microservices that can handle the same tasks. Service A starts with a message that takes 1 hour to process whilst Service B starts with a message that takes just 10 minutes. When using round robin dispatching at the message service, the third message would be handed to service A sitting idle in its mailbox for an hour, whilst it could be processed after 10 minutes at service B.
+One use case in a microservice architecture is that we can use back pressure to optimize our messaging service. By implementing one of the new [reactive](https://github.com/ScalaConsultants/reactive-rabbit) [libraries](https://github.com/akka/reactive-kafka) we can signal back to the message service if new messages could be processed. Imagine two microservices that can handle the same tasks. Service A starts with a message that takes 1 hour to process whilst Service B starts with a message that takes just 10 minutes. When using round-robin dispatching at the message service, the third message would be handed to service A sitting idle in its mailbox for an hour, whilst it could be processed after 10 minutes at service B.
 
 By using back pressure our message service connector could request the message when it’s done processing its last message, thus the third message would be send to Service B. 
 
@@ -257,7 +267,9 @@ Each request we made took 4 seconds, so this code actually ran asynchronously. N
 
 Finally, let’s visualize our data being transformed through our stream:
 
-![complete marble](/assets/reactive_streams/marble_diagram_complete_weather.png "complete marble")
+{% include image.html 
+  url="/assets/reactive_streams/marble_diagram_complete_weather.png" 
+  description="<b>Fig 8: </b>Complete weather stream  " %}
 
 ## Conclusion
 Using reactive streams allows us to write code that handles concurrency problems with elegance. We can be sure that streams that we write can consume and publish data to other libraries by implementing Java 9s new `Flow` class. Finally, by ensuring back pressure is communicated throughout the stream, we ensure buffer problems are handled at the right level. 

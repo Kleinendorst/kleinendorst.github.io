@@ -42,7 +42,10 @@ Let’s try to solve our weather problem by the use of actors. In this example w
 
 Our actor diagram will look like this:
 
-![image](/assets/diagram.png "Diagram")
+{% include image.html 
+  url="/assets/diagram.png" 
+  description="<b>Fig. 1:</b> Actor model diagram" %}
+
 
 Let’s walk over each of the steps:
 

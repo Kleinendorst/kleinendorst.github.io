@@ -37,7 +37,10 @@ This shows the fake implementation for the REST API call. First we create a rand
 
 Methods that can throw an error, and don’t handle the error themselves, include the exceptions it can throw in the call signature. The `throws TimeoutException` on the first line indicates to callers of this method should implement the error handling themselves or should escalate it upwards. 
 
-![image](/assets/failure.png "Failure")
+{% include image.html 
+  url="/assets/failure.png" 
+  description="<b>Fig 1: </b>TimeoutException unhandled" %}
+
 
 The `getPredTemp()` function didn’t implement a try/catch block around the `callRestForTemp()` call and also didn’t escalate it to its caller by including the `TimeoutException` in its method signature. To fix this error we could write this:
 
