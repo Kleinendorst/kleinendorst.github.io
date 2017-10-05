@@ -1,7 +1,7 @@
 <section class="page-header">
 	<h1 class="project-name">{{ site.title }}</h1>
 	<h2 class="project-tagline">{{ site.tagline }}</h2>
-	<a href="/" class="btn">Home</a>
+	<a href="/" class="btn">Home</a><br>
 	{% for post in site.posts reversed %}
 		<a href="{{ site.baseurl }}{{ post.url }}" class="btn">{{ forloop.index }}. {{ post.title }}</a>
 	{% endfor %}

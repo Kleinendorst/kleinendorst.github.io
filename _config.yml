@@ -1,13 +1,13 @@
 # Setup
 title:        Reactive blog
-tagline:      Disovering Reactive systems
+tagline:      Disovering reactive systems
 baseurl:      ""
 paginate:     1
 
 # About/contact
 author:
   name:       Thomas Kleinendorst
-  url:        http://kleinendorst.eu 
+  url:        http://kleinendorst.info
 
 # Gems
 gems:
