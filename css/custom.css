@@ -39,3 +39,23 @@
 	width: 24px;
 	height: 24px;
 }
+
+.btn.left {
+	border-radius: 5px 0 0 5px;
+}
+
+.btn.middle {
+	border-radius: 0;
+	margin-left: 0;
+}
+
+.btn.right {
+	border-radius: 0 5px 5px 0;
+	margin-left: 0;
+}
+
+.btn.disabled {
+	background: rgba(0, 0, 0, 0.5);
+	border-color: #555;
+	cursor: default;
+}
