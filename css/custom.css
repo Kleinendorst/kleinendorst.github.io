@@ -47,6 +47,7 @@
 .btn.middle {
 	border-radius: 0;
 	margin-left: 0;
+	cursor: pointer;
 }
 
 .btn.right {
@@ -55,7 +56,49 @@
 }
 
 .btn.disabled {
-	background: rgba(0, 0, 0, 0.5);
-	border-color: #555;
+	background-color: rgba(0, 0, 0, 0.2);
+	border-color: rgba(255, 255, 255, 0.2);
 	cursor: default;
+	pointer-events: none;
+}
+
+.overview-container {
+	width: 400px;
+	background-color: rgba(0, 0, 0, 0.2);
+	border-radius: 5px;
+	border: 1px rgba(0, 0, 0, 0.1) solid;
+	position: absolute;
+	left: calc(50% - 200px);
+}
+
+.overview-container.hidden {
+	display: none;
+}
+
+.overview-container .inner-container {
+	background: white;
+	border-radius: 5px;
+	width: 380px;
+	margin: 10px;
+	padding: 0px;
+}
+
+.inner-container ul {
+	margin: 0;
+	padding: 0;
+}
+
+.inner-container a {
+	text-decoration: none !important;
+}
+
+.post-item {
+	color: black;
+	list-style-type: none;
+    margin: 0;
+    padding: 10px;
+}
+
+.post-item:hover {
+	background-color: #EEE;
 }

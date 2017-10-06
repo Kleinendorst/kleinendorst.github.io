@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"cu",
+				"cursor"
+			],
+			[
+				"mar",
+				"margin"
+			],
+			[
+				"wid",
+				"width"
+			],
+			[
 				"inl",
 				"inline-block"
 			],
@@ -99,14 +111,18 @@
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_includes",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_layouts",
-		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts"
+		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts",
+		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/css"
 	],
 	"file_history":
 	[
-		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-10-04-message-brokers.md",
-		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-10-03-microservice-message-solutions.md",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_includes/page-header.html",
+		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/css/custom.css",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_config.yml",
+		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-09-22-asynchronous-java.md",
+		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-10-04-message-brokers.md",
+		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_includes/head.html",
+		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-10-03-microservice-message-solutions.md",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-09-29-reactive-streams.md",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-09-22-actor-model-introduction.md",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/sublime_settings.sublime-project",
@@ -114,13 +130,10 @@
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_site/main/2017/10/03/microservice-message-solutions.html",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-09-25-actor-model-supervision.md",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_site/main/2017/09/29/reactive-streams.html",
-		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_posts/2017-09-22-asynchronous-java.md",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_includes/disqus.html",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_layouts/default.html",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_layouts/post.html",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_includes/about-author.html",
-		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/css/custom.css",
-		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_includes/head.html",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_includes/page-footer.html",
 		"/C/Users/ThomasK/Documents/Projects/kleinendorst.github.io/_layouts/about-author.html",
 		"/C/Users/ThomasK/Desktop/failure.PNG",
@@ -139,7 +152,7 @@
 	],
 	"find":
 	{
-		"height": 40.0
+		"height": 27.0
 	},
 	"find_in_files":
 	{
@@ -154,6 +167,15 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"next",
+			"<i",
+			"services don't",
+			"asynchr",
+			"the route",
+			" ",
+			"\\w",
+			"ironmq",
+			"message",
 			"Enterprise ser",
 			"inter-service communication",
 			"round rob",
@@ -251,12 +273,28 @@
 		"selected_items":
 		[
 			[
-				"micro",
-				"_posts\\2017-10-03-microservice-message-solutions.md"
+				"cuso",
+				"css\\custom.css"
+			],
+			[
+				"custom",
+				"css\\custom.css"
+			],
+			[
+				"confi",
+				"_config.yml"
 			],
 			[
 				"message",
-				"_posts\\2017-10-04-message-brokers.md"
+				"_posts\\2017-10-03-microservice-message-solutions.md"
+			],
+			[
+				"mic",
+				"_posts\\2017-10-03-microservice-message-solutions.md"
+			],
+			[
+				"micro",
+				"_posts\\2017-10-03-microservice-message-solutions.md"
 			],
 			[
 				"conf",
@@ -293,10 +331,6 @@
 			[
 				"custo",
 				"css\\custom.css"
-			],
-			[
-				"confi",
-				"_config.yml"
 			],
 			[
 				"page",

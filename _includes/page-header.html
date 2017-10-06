@@ -4,7 +4,16 @@
 	<a href="/" class="btn">Blog overview</a><br>
 	{% if page.id != null %}
 		<a href="{{ page.previous.url }}" title="{{ page.previous.title }}" class="btn left {% if page.previous.url == null %}disabled{% endif %}"><</a>
-		<a href="{{ page.url }}" class="btn middle">{{ page.title}}</a>
+		<div class="btn middle">{{ page.title}}</div>
 		<a href="{{ page.next.url }}" title="{{ page.next.title }}" class="btn right {% if page.next.url == null %}disabled{% endif %}">></a>
 	{% endif%}
+	<div class="overview-container hidden">
+		<div class="inner-container">
+			<ul>
+				{% for post in site.posts %}
+				<a href="{{post.url}}"><li class="post-item">{{post.title}}</li></a>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
 </section>
