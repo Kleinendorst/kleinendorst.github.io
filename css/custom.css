@@ -69,6 +69,7 @@
 	border: 1px rgba(0, 0, 0, 0.1) solid;
 	position: absolute;
 	left: calc(50% - 200px);
+	outline: none !important;
 }
 
 .overview-container.hidden {
@@ -97,6 +98,10 @@
 	list-style-type: none;
     margin: 0;
     padding: 10px;
+}
+
+.post-item.active {
+	background-color: #DDD;
 }
 
 .post-item:hover {

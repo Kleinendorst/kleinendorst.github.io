@@ -34,10 +34,10 @@ if (actual < predicted) {
 
 The `WeatherService` will make a REST API request to retrieve information. Retrieving information via REST is a (relatively) time consuming task. In this example the predicted temperature may only be retrieved once the current temperature is retrieved. These tasks could easily be retrieved in parallel.
 
-When the call stack is waiting for a return value, in this case from the `WeatherService`, it can’t execute additional code. In our case this means that our task will take more time. In the case of a visual application, the GUI will freeze and not respond to user input. To solve these kind of issues, we use multi-threading.
+When the call stack is waiting for a return value, in this case from the `WeatherService`, it can’t execute additional code. In our case this means that our task will take more time. In the case of a visual application, the GUI will freeze and not respond to user input[^3]. To solve these kind of issues, we use multi-threading.
 
 ## Multi-threading NIO
-NI/O (non blocking I/O) is achieved by reserving software threads[^2]. Reserving threads is not supported by all modern programming languages[^3], but it is supported in Java. Let’s look at an example:
+NI/O (non blocking I/O) is achieved by reserving software threads[^2]. Reserving threads is not supported by all modern programming languages[^4], but it is supported in Java. Let’s look at an example:
 
 ``` java
 class Weather {
@@ -176,7 +176,7 @@ public class Main {
 }
 ```
 
-We create `Runnable` instances which will be the input for a new `Thread` object we create. These `Runnable` objects will perform their task inside a thread allocated by the JVM[^4], and therefore, will be ran in parallel. Now let’s compare the console output and see if this code was faster to execute:
+We create `Runnable` instances which will be the input for a new `Thread` object we create. These `Runnable` objects will perform their task inside a thread allocated by the JVM[^5], and therefore, will be ran in parallel. Now let’s compare the console output and see if this code was faster to execute:
 
 ```
 Start getting the actual temperature:: running for: 12ms
@@ -187,14 +187,15 @@ It's colder than predicted.:: running for: 7017ms
 
 There are also some downsides to using multithreading. We have to check after each `Runnable` whether both values have been returned, because we don't know the finishing order of `Runnable` objects.
 
-Also mutable variables may become faulty if accessed by threads at the same time. In order to prevent corrupt data, one can use Java’s atomic variable types[^5] or implement locking[^6]. Both increase complexity in large systems. Also, bugs that result from accessing variables on different threads are hard to find.
+Also mutable variables may become faulty if accessed by threads at the same time. In order to prevent corrupt data, one can use Java’s atomic variable types[^6] or implement locking[^7]. Both increase complexity in large systems. Also, bugs that result from accessing variables on different threads are hard to find.
 
 In the [next article]({{ page.next.url }}) we’ll have a look at the basics of the actor system, a model that was created specially for asynchronous computing. We’ll discover how the system works, how it solves concurrency problems and how to implement it in Java.
 
 ----------------
 [^1]: Some more associativity rules for Java can be found [here](http://introcs.cs.princeton.edu/java/11precedence/).
 [^2]: There is a difference between software and hardware threads: see [this](https://stackoverflow.com/questions/5593328/software-threads-vs-hardware-threads).
-[^3]: Like Javascript that uses promises to handle asynchronous tasks. [MDN page of promises](https://developer.mozilla.org/nl/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-[^4]: [Java virtual machine](https://nl.wikipedia.org/wiki/Java_Virtual_Machine)
-[^5]: [Atomic variables](https://docs.oracle.com/javase/tutorial/essential/concurrency/atomicvars.html)
-[^6]: [Locking](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/Lock.html)
+[^3]: See for example [this JavaFX article](http://docs.oracle.com/javafx/2/threads/jfxpub-threads.htm).
+[^4]: Like Javascript that uses promises to handle asynchronous tasks. [MDN page of promises](https://developer.mozilla.org/nl/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+[^5]: [Java virtual machine](https://nl.wikipedia.org/wiki/Java_Virtual_Machine)
+[^6]: [Atomic variables](https://docs.oracle.com/javase/tutorial/essential/concurrency/atomicvars.html)
+[^7]: [Locking](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/Lock.html)

@@ -10,6 +10,8 @@ When the processing power of the architecture isn't sufficient, it can be scaled
 more RAM and Faster CPU's. This vertical approach is relatively easy because we don't have to change our
 code. At some point the limitations of vertical scaling are met, and it is time to think about horizontal scaling.
 
+> Another disadvantage is downtime caused by vertical scaling.
+
 Horizontal scaling is achieved by adding more servers to perform computations.
 Horizontal scaling is considerably more difficult than vertical scaling because the 
 architecture must allow horizontal scaling.

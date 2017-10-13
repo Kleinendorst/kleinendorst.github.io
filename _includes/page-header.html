@@ -7,11 +7,11 @@
 		<div class="btn middle">{{ page.title}}</div>
 		<a href="{{ page.next.url }}" title="{{ page.next.title }}" class="btn right {% if page.next.url == null %}disabled{% endif %}">></a>
 	{% endif%}
-	<div class="overview-container hidden">
+	<div class="overview-container hidden" tabindex="-1">
 		<div class="inner-container">
 			<ul>
 				{% for post in site.posts %}
-				<a href="{{post.url}}"><li class="post-item">{{post.title}}</li></a>
+				<a href="{{post.url}}"><li class="post-item {% if post.url == page.url %}active{% endif %}">{{post.title}}</li></a>
 				{% endfor %}
 			</ul>
 		</div>

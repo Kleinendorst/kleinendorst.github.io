@@ -26,7 +26,7 @@ Another advantage of REST is interoperability. REST communication happens via
 open text-based standards, such as XML and JSON. Libraries for parsing these messages, and receiving HTTP requests
 are available in practically all languages. 
 
-> The Marshalling and unmarshalling of text formats like JSON is a costly operation.
+> The Marshalling and unmarshalling of text formats like JSON and XML is a costly operation[^1].
 
 Inter-service communication via REST is similar to the way way we made 
 [direct calls  between Java methods]({% post_url 2017-09-22-asynchronous-java %}#blocking-io) and shares its disadvantages,
@@ -140,3 +140,6 @@ harder to scale properly when our systems becomes bigger.
 Our knowledge of different methods of communication should be enough to decide which 
 approach we should take. When we choose for a ESB, our research is not done: There are lots
 of different messaging platforms. In the [next article]({{ page.next.url }}) we'll take a look at the differences between these message brokers.
+
+---------
+[^1]: [Protocol Buffers, a binary format by google, is made espascially to decode/encode faster.](https://developers.google.com/protocol-buffers/docs/overview#whynotxml)

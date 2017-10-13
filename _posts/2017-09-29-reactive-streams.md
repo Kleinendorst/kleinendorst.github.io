@@ -13,9 +13,9 @@ In this article we shall take a look at reactive streams. First we’ll discover
 Reactive streams are an embodiment of the publish-subscribe pattern, which passes data in a  type safe manner to build pipelines in which data can be send over an asynchronous boundary. This definition is a bit abstract, so we'll look at these streams piece by piece. 
 
 ## Origin
-The idea of reactive streams originates from somewhere in 2013 and was pioneered by Netflix, Pivotal and Lightbend[^1]. This group of companies created an open format which reactive streams libraries can implement in order to stay interoperable with each other. The original specification can be found [here](http://www.reactive-streams.org/) and consists of a lightweight jar with 4 interfaces. This interface specification is now part of Java 9 as the [Flow class](http://download.java.net/java/jdk9/docs/api/java/util/concurrent/Flow.html). 
+The idea of reactive streams originates from somewhere in 2013 and was pioneered by Netflix, Pivotal and Lightbend[^1]. This group of companies created an [open format](http://www.reactive-streams.org/) that reactive streams libraries can implement in order to stay interoperable with each other. The original specification consists of a lightweight jar with 4 interfaces. This interface specification is now part of Java 9 as the [Flow class](http://download.java.net/java/jdk9/docs/api/java/util/concurrent/Flow.html). 
 
-Implementations of the reactive streams specification includes Netflix [RXJava](http://reactivex.io/) (as part of the ReactiveX project), Pivotals [Project Reactor](http://projectreactor.io/) and Lightbends [Akka Streams](http://doc.akka.io/docs/akka/2.5/scala/stream/index.html). These libraries each provide their own publishers, operators and subscribers. Besides the reactive streams libraries themselves, some new versions of technologies added libraries that support working with publishers and subscribers, most notably is Spring 5 which enables web programming using reactive streams.
+Implementations of the reactive streams specification includes Netflix's [RXJava](http://reactivex.io/) (as part of the ReactiveX project), Pivotals [Project Reactor](http://projectreactor.io/) and Lightbends [Akka Streams](http://doc.akka.io/docs/akka/2.5/scala/stream/index.html). These libraries each provide their own publishers, operators and subscribers. Besides the reactive streams libraries themselves, some new versions of technologies added libraries that support working with publishers and subscribers, most notably is Spring 5 which enables web programming using reactive streams[^2].
 
 ## So what are these streams?
 The reactive streams specification exists of four elements: 
@@ -38,7 +38,7 @@ upper.subscribe(System.out::println);
 
 1. We create a `Publisher`. Our `Publisher` is of type `Flux<T>` which is one of the `Publisher` types provided by Project Reactor. A number of simple factory functions are provided, like `just()` which creates a `Flux<T>` which emits its parameters as values.
 2. `map()` is an operator function which means it returns `Flux<T>` of it’s own. The `map()` function takes all objects coming from our `Publisher` and transforms it using a lambda, in our case applying the `toUpperCase()` function to each `String`. 
-3. One of the advantages of reactive streams is that, most of them[^2], won’t perform any logic until subscribed to. If we leave out our `subscribe()` function, our program wouldn’t do anything at all. Here we subscribe and call `System.out.println()` for each `String` object received. 
+3. One of the advantages of reactive streams is that, most of them[^3], won’t perform any logic until subscribed to. If we leave out our `subscribe()` function, our program wouldn’t do anything at all. Here we subscribe and call `System.out.println()` for each `String` object received. 
 
 Running this example results in the following output:
 ```
@@ -276,4 +276,5 @@ Using reactive streams allows us to write code that handles concurrency problems
 
 ----------------
 [^1]: Lightbend is the developer of the Akka streams we saw in an earlier article
-[^2]: There are publishers that start emitting when created, but we’ll not focus on these in this article.
+[^2]: Via [Spring Webflux](https://docs.spring.io/spring-framework/docs/5.0.0.BUILD-SNAPSHOT/spring-framework-reference/html/web-reactive.html).
+[^3]: There are publishers that start emitting when created, but we’ll not focus on these in this article.

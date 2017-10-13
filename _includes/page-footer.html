@@ -11,5 +11,15 @@
 	var menu = $('.overview-container');
 	middleButton.click(function (event) {
 		menu.toggleClass('hidden');
+		menu.focus();
+	});
+
+	menu.focusout(function () {
+		// handle click handler for inner links before removing the class
+		// this is a dirty fix, but I have no intention to spend time
+		// on checking the current target on focus loss.
+		setTimeout(function () {
+			menu.toggleClass('hidden', true);
+		}, 100);
 	});
 </script>

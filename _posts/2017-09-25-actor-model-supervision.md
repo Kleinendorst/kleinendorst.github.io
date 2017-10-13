@@ -83,7 +83,7 @@ To summarize: thrown errors can be handled at the current level or be escalated 
 Now the problem with this approach in the actor system is named in the last sentence: *“escalated to handle higher in the call stack”*. Tasks that are delegated to an actor are requested in a fire and forget fashion. The actor that receives the message doesn’t run in the same thread and has its own call stack. When something nasty happens in this call stack, there is no way to escalate this error to its caller.
 
 ## Supervision
-In actor systems, try/catch blocks are rarely written and considered bad practice in most cases. The preferred method is to fail the actor entirely and let its parent decide what to do next. Each actor defines a so called “supervision strategy” which is configuration that tells the actor how to handle failing children. Let’s look how this is configured:
+In actor systems, try/catch blocks are rarely written and considered bad practice in most cases[^1]. The preferred method is to fail the actor entirely and let its parent decide what to do next. Each actor defines a so called “supervision strategy” which is configuration that tells the actor how to handle failing children. Let’s look how this is configured:
 
 ``` java
 @Override
@@ -127,9 +127,9 @@ Next we can choose between four options per kind of exception thrown:
 
 4. **Escalate** - The supervisor will fail itself thus escalating the problem to *its* supervisor.
 
-The strategy object is returned when calling the appropriate method on the `SupervisorStrategy` which we imported statically. Besides having to return a method in these hooks we can execute any logic, but keep in mind we can’t access the failing child's state or message with which it failed. Let’s look at some examples where each strategy is suitable. 
+The strategy object is returned when calling the appropriate method on the `SupervisorStrategy` which we imported statically. Besides having to return a method in these hooks we can execute logic, but keep in mind, we can’t access the failing child's state or message with which it failed. Let’s look at some examples where each strategy is suitable. 
 
-**Example 1:** Imagine we have an actor that is responsible for collecting temperature readings from sensors. This task will delegate getting the measures to child actors, which will call rest endpoints on these sensors. We choose a `OneForOneStrategy` because the failing of one sensor doesn’t influence the readings of the other sensors (the result list of temperature readings been build in the supervisor actor). Whenever a temperature fails it’s perfectly acceptable to ignore it for the report, thus we choose the **stop** this service. 
+**Example 1:** Imagine we have an actor that is responsible for collecting temperature readings from sensors. This task will delegate getting the measures to child actors, which will call REST endpoints on these sensors. We choose a `OneForOneStrategy` because the failing of one sensor doesn’t influence the readings of the other sensors (the result list of temperature readings been build in the supervisor actor). Whenever a temperature fails it’s perfectly acceptable to ignore it for the report, thus we choose the **stop** this service. 
 
 **Example 2:** Imagine an actor that has to sort some objects, it delegates the sorting of 2 objects to child actors. Whenever a child fails, the result of the supervisor is flawed so it’s better to use a `AllForOneStrategy`.
 
@@ -181,11 +181,11 @@ public Receive createReceive() {
 }
 ```
 
-Each time we call the rest service it has a 50% fail change. When running the program a few times with logs configured to show actor lifecycle events in the log[^1] we can discover the standard strategy used by Akka. 
+Each time we call the REST service it has a 50% fail change. When running the program a few times with logs configured to show actor lifecycle events in the log[^2], we can discover the standard strategy used by Akka. 
 
-The default behavior is to restart actors. When the strategy is never configured, as is the case here,the actor will be restarted but no new message will be present. Each actor defines the `OneForOneStrategy`, this can be seen when either the actual or the predicted actor fails, only the lifecycle hooks of the failing actor are called. These hooks also make it apparent that **restart** is the default. In this case the actors are restarted. 
+The default behavior is to restart actors. When the strategy is never configured, as is the case here, the actor will be restarted but no new message will be present. Each actor defines the `OneForOneStrategy`, this can be seen when either the actual or the predicted actor fails, only the lifecycle hooks of the failing actor are called. These hooks also make it apparent that **restart** is the default. In this case the actors are restarted. 
 
-The default behavior of these actors isn’t suitable for our example, so let’s change it. First we need to think about the actor that needs to handle the `TimeoutException`. We might think the `PredictionCompareTask` is a logical choice, but this wouldn’t result in the `PredictionCompareTask` failing when the rest calls fail. In order for a `PredictionCompareTask` to finish successfully it will have to collect **both** Rest calls successfully.
+The default behavior of these actors isn’t suitable for our example, so let’s change it. First we need to think about the actor that needs to handle the `TimeoutException`. We might think the `PredictionCompareTask` is a logical choice, but this wouldn’t result in the `PredictionCompareTask` failing when the REST calls fail. In order for a `PredictionCompareTask` to finish successfully it will have to collect **both** Rest calls successfully.
 
 This means that we have to escalate the `TimeoutException` in the `PredictionCompareTask` and handle it in the `WeatherManager`:
 
@@ -278,7 +278,7 @@ public Receive createReceive() {
 
 4. When registering actors to watch with `getContext().watch()` we receive regular `Terminated` messages.
 
-By storing more information about current running tasks, supervisors can be more verbose about failing tasks but we didn’t bother for simplicity. Notice that we use this `Terminated` approach when we want to track which actor failed. If we don’t care about the specific actor, the `SupervisorStrategy` also provides hooks.
+By storing more information about current running tasks, supervisors can be more verbose about failing tasks but we didn’t bother for simplicity. Notice that we use this `Terminated` approach when we want to track which actor failed. If we don’t care about the specific actor, the `SupervisorStrategy` also provides hooks for our logic.
 
 
 ## Conclusion
@@ -287,4 +287,5 @@ By thinking about supervision strategies in our actors, we can configure the sys
 In the [next article]({{ page.next.url }}) we'll discuss Reactive streams. 
 
 ------------------------
-[^1]: Instructions can be found [here](http://doc.akka.io/docs/akka/snapshot/scala/general/configuration.html).
+[^1]: [Error handling should be handled by the parrent of the failing actor.](https://manuel.bernhardt.io/2016/08/09/akka-anti-patterns-flat-actor-hierarchies-or-mixing-business-logic-and-failure-handling/)
+[^2]: Instructions can be found [here](http://doc.akka.io/docs/akka/snapshot/scala/general/configuration.html).
