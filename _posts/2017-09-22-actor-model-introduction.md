@@ -312,7 +312,7 @@ When we have “fetched” the temperature we will return it to the sender.
 1. We create a random temperature to send back. 
 The scheduler sends the messages within 3 seconds thanks to the random latency. 
 2. We schedule a message to be send in Akka. 
-We provide the arguments in order: the timeframe after which it should send the message, 
+We provide the arguments in order: the time frame after which it should send the message, 
 the recipient of the message, the message, a dispatcher that will send the message, the sender.
 3. After we scheduled the message we can consider the work of the actor done. It can now be destroyed. 
 
