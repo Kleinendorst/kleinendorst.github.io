@@ -5,10 +5,16 @@ date:   2017-09-22 14:30:00
 categories: main
 comments: true
 ---
-In order to properly scale applications, asynchronous task handling is key. The principal of asynchronous systems can be achieved on both application and architectural level. In this article we will discuss blocking I/O and its disadvantages, as well as how to implement nonblocking I/O. The examples in this article will be written in Java, but apply to most modern programming languages.
+In order to properly scale applications, 
+asynchronous task handling is key[^1]. 
+The principal of asynchronous systems can be achieved on both application and architectural level. 
+In this article we will discuss blocking I/O and its disadvantages, as well as how to implement non-blocking I/O. 
+The examples in this article will be written in Java, but apply to more modern programming languages.
 
 ## Blocking I/O
-In source code the compiler searches for an order in which to resolve expressions. The compiler keeps track of its current tasks in a FILO (first in last out) array called the "call stack". Let’s look at how this works: 
+A compiler searches In source code  for an order in which to resolve expressions. 
+The compiler keeps track of its current tasks in a FILO (first in last out) array called the "call stack". 
+Let’s look at how this works: 
 
 ```java
 int a = 2 * 60 + 3;
@@ -17,7 +23,7 @@ int a = 2 * 60 + 3;
 // --> writes 123 to space a in memory
 ```
 
-Ordering in this example is resolved in a mathematically correct fashion, but languages also have some rules of their own[^1]. Whenever an expression is finished, the next runnable line of code is executed. Notice that this next line of code can only be executed once the first line of code has finished executing, even though the second line isn’t dependent on the first line. 
+Ordering in this example is resolved in a mathematically correct fashion, but languages also have some rules of their own[^2]. Whenever an expression is finished, the next runnable line of code is executed. Notice that this next line of code can only be executed once the first line of code has finished executing, even though the second line isn’t dependent on the first line. 
 In simple examples, like the first example, this doesn’t pose much of a problem, but consider the following example:
 
 ``` java
@@ -32,12 +38,20 @@ if (actual < predicted) {
 }
 ```
 
-The `WeatherService` will make a REST API request to retrieve information. Retrieving information via REST is a (relatively) time consuming task. In this example the predicted temperature may only be retrieved once the current temperature is retrieved. These tasks could easily be retrieved in parallel.
+The `WeatherService` will make a REST API request to retrieve information. 
+Retrieving information via REST is a (relatively) time consuming task. 
+In this example the predicted temperature may only be retrieved once the current temperature is retrieved. 
+These tasks could easily be run in parallel.
 
-When the call stack is waiting for a return value, in this case from the `WeatherService`, it can’t execute additional code. In our case this means that our task will take more time. In the case of a visual application, the GUI will freeze and not respond to user input[^3]. To solve these kind of issues, we use multi-threading.
+When the call stack is waiting for a return value, in this case from the `WeatherService`, 
+it can’t execute additional code. In our case this means that our task will take more time. 
+In the case of a visual application, the GUI will freeze and not respond to user input[^3]. 
+To solve these kind of issues, we use multi-threading.
 
 ## Multi-threading NIO
-NI/O (non blocking I/O) is achieved by reserving software threads[^2]. Reserving threads is not supported by all modern programming languages[^4], but it is supported in Java. Let’s look at an example:
+NI/O (non blocking I/O) is achieved by reserving software threads[^4]. 
+Reserving threads is not supported by all modern programming languages[^5], 
+but it is supported in Java. Let’s look at an example:
 
 ``` java
 class Weather {
@@ -72,7 +86,9 @@ class Weather {
 }
 ```
 
-This `Weather` object has setters for both the actual and the predicted value. Whenever both values are not `null`, it will access its values. Now look at the fake implementation of the `WeatherService`:
+This `Weather` object has setters for both the actual and the predicted value. 
+Whenever both values are not `null`, it will access its values. 
+Now look at the fake implementation of the `WeatherService`:
 
 ``` java
 class WeatherService {
@@ -96,7 +112,9 @@ class WeatherService {
 }
 ```
 
-In order to simulate a long response time we call `Thread.sleep()`, which just stalls all code execution for the provided number of milliseconds. Now let’s run this code in a blocking way first:
+In order to simulate a long response time we call `Thread.sleep()`, 
+which just stalls all code execution for the provided number of milliseconds. 
+Now let’s run this code in a blocking way first:
 
 ``` java
 public class Main {
@@ -136,7 +154,8 @@ Start getting the predicted temperature:: running for: 7016ms
 It's colder than predicted.:: running for: 12016ms
 ```
 
-Notice that it starts fetching the predicted temperature only when the current temperature was already fetched. Now let’s rewrite the `Main` class so that the fetching can happen in parallel:
+Notice that it starts fetching the predicted temperature only when the current temperature was already fetched. 
+Now let’s rewrite the `Main` class so that fetching happens in parallel:
 
 ``` java
 public class Main {
@@ -176,7 +195,9 @@ public class Main {
 }
 ```
 
-We create `Runnable` instances which will be the input for a new `Thread` object we create. These `Runnable` objects will perform their task inside a thread allocated by the JVM[^5], and therefore, will be ran in parallel. Now let’s compare the console output and see if this code was faster to execute:
+We create `Runnable` instances which will be the input for a new `Thread` object we create. 
+These `Runnable` objects will perform their task inside a thread allocated by the JVM[^6], 
+and therefore, will be run in parallel. Now let’s compare the console output and see if this code was faster to execute:
 
 ```
 Start getting the actual temperature:: running for: 12ms
@@ -185,17 +206,25 @@ Press any key to stop.
 It's colder than predicted.:: running for: 7017ms
 ```
 
-There are also some downsides to using multithreading. We have to check after each `Runnable` whether both values have been returned, because we don't know the finishing order of `Runnable` objects.
+There are also some downsides to using multithreading. 
+We have to check after each `Runnable` whether both values have been returned, 
+because we don't know the finishing order of `Runnable` objects. Syncing issues are the main issues of multithreading.
 
-Also mutable variables may become faulty if accessed by threads at the same time. In order to prevent corrupt data, one can use Java’s atomic variable types[^6] or implement locking[^7]. Both increase complexity in large systems. Also, bugs that result from accessing variables on different threads are hard to find.
+Also mutable variables may become faulty if accessed by threads at the same time. 
+In order to prevent corrupt data, one can use Java’s atomic variable types[^7] or implement locking[^8]. 
+Both increase complexity in large systems. 
+Also, bugs that result from accessing variables on different threads are hard to find.
 
-In the [next article]({{ page.next.url }}) we’ll have a look at the basics of the actor system, a model that was created specially for asynchronous computing. We’ll discover how the system works, how it solves concurrency problems and how to implement it in Java.
+In the [next article]({{ page.next.url }}) 
+we’ll have a look at the basics of the actor system, a model that was created specially for asynchronous computing. 
+We’ll discover how the system works, how it solves concurrency problems and how to implement it in Java.
 
 ----------------
 [^1]: Some more associativity rules for Java can be found [here](http://introcs.cs.princeton.edu/java/11precedence/).
-[^2]: There is a difference between software and hardware threads: see [this](https://stackoverflow.com/questions/5593328/software-threads-vs-hardware-threads).
-[^3]: See for example [this JavaFX article](http://docs.oracle.com/javafx/2/threads/jfxpub-threads.htm).
-[^4]: Like Javascript that uses promises to handle asynchronous tasks. [MDN page of promises](https://developer.mozilla.org/nl/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-[^5]: [Java virtual machine](https://nl.wikipedia.org/wiki/Java_Virtual_Machine)
-[^6]: [Atomic variables](https://docs.oracle.com/javase/tutorial/essential/concurrency/atomicvars.html)
-[^7]: [Locking](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/Lock.html)
+[^2]: A video about this need can be found [here](https://particular.net/webinars/scaling-with-asynchronous-messaging)
+[^3]: There is a difference between software and hardware threads: see [this](https://stackoverflow.com/questions/5593328/software-threads-vs-hardware-threads).
+[^4]: See for example [this JavaFX article](http://docs.oracle.com/javafx/2/threads/jfxpub-threads.htm).
+[^5]: Like Javascript that uses promises to handle asynchronous tasks. [MDN page of promises](https://developer.mozilla.org/nl/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+[^6]: [Java virtual machine](https://nl.wikipedia.org/wiki/Java_Virtual_Machine)
+[^7]: [Atomic variables](https://docs.oracle.com/javase/tutorial/essential/concurrency/atomicvars.html)
+[^8]: [Locking](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/locks/Lock.html)
